@@ -1,0 +1,75 @@
+# MycilaHADiscovery
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Continuous Integration](https://github.com/mathieucarbou/MycilaHADiscovery/actions/workflows/ci.yml/badge.svg)](https://github.com/mathieucarbou/MycilaHADiscovery/actions/workflows/ci.yml)
+[![PlatformIO Registry](https://badges.registry.platformio.org/packages/mathieucarbou/library/MycilaHADiscovery.svg)](https://registry.platformio.org/libraries/mathieucarbou/MycilaHADiscovery)
+
+Simple and efficient Home Assistant Discovery library for Arduino / ESP32
+
+## Features
+
+- Supports diagnostic sensors, config sensors and normal sensors
+- Editable components:
+  - button
+  - switch / outlet
+  - select
+  - slider / box with min, max, step
+  - input (number and text)
+- Sensors:
+  - text
+  - binary (state)
+  - gauge
+  - counter
+- Supports regex validation
+- Supports availability (global and per component)
+- Supports device class, icon, state class, unit of measurement
+
+## Basic Usage
+
+Setup:
+
+```c++
+  HADiscovery.setBaseTopic("/my-app");
+
+  HADiscovery.setPublisher([](const String& topic, const String& payload) {
+    // Here, you would call your mqttClient.publish() code
+    Serial.println(topic);
+    Serial.println(payload);
+  });
+
+  HADiscovery.setDevice({
+    .id = "my-app-1234",
+    .name = "My Application Name",
+    .version = "1.0.0",
+    .model = "OSS",
+    .manufacturer = "Mathieu Carbou",
+    .url = "http://" + WiFi.localIP().toString(),
+  });
+
+```
+
+Then query state:
+
+```c++
+
+  // some diagnostic info
+  HADiscovery.publish(HAButton("restart", "Restart", "/system/restart", "restart", nullptr, HACategory::DIAGNOSTIC));
+  HADiscovery.publish(HACounter("uptime", "Uptime", "/system/uptime", "duration", nullptr, "s", HACategory::DIAGNOSTIC));
+  HADiscovery.publish(HAGauge("memory_used", "Memory Used", "/system/heap_used", "data_size", "mdi:memory", "B", HACategory::DIAGNOSTIC));
+  HADiscovery.publish(HAState("ntp", "NTP", "/ntp/synced", "true", "false", "connectivity", nullptr, HACategory::DIAGNOSTIC));
+  HADiscovery.publish(HAText("hostname", "Hostname", "/config/hostname", nullptr, "mdi:lan", HACategory::DIAGNOSTIC));
+
+  // some configuration
+  HADiscovery.publish(HATextField("mqtt_publish_interval", "MQTT Publish Interval", "/config/mqtt_interval/set", "/config/mqtt_interval", "^\\d+$", "mdi:timer-sand", HACategory::CONFIG));
+  HADiscovery.publish(HANumber("relay1_power_threshold", "Relay 1 Power Threshold", "/config/rel1_power/set", "/config/rel1_power", HANumberMode::SLIDER, 0, 3000, 50, "mdi:flash", HACategory::CONFIG));
+  HADiscovery.publish(HASwitch("output1_auto_bypass_enable", "Output 1 Auto Bypass", "/config/switch/set", "/config/switch", "true", "false", "mdi:water-boiler-auto", HACategory::CONFIG));
+  HADiscovery.publish(HASelect("day", "Day", "/config/day/set", "/config/day", nullptr, HACategory::CONFIG, {"mon", "tue", "wed", "thu", "fri", "sat", "sun"}));
+
+  // some sensors
+  HADiscovery.publish(HAState("grid", "Grid Electricity", "/grid/online", "true", "false", "connectivity"));
+  HAOutlet relay1Commute("rel_commute", "Relay 1", "/relays/rel1/state/set", "/relays/rel1/state", "on", "off");
+  relay1Commute.availabilityTopic = "/relays/rel1/enabled";
+  relay1Commute.payloadAvailable = "true";
+  relay1Commute.payloadNotAvailable = "false";
+  HADiscovery.publish(relay1Commute);
+```

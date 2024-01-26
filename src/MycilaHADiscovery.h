@@ -1,0 +1,243 @@
+// SPDX-License-Identifier: MIT
+/*
+ * Copyright (C) 2023-2024 Mathieu Carbou and others
+ */
+
+/* https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
+ * https://www.home-assistant.io/integrations/sensor/#device-class
+ * https://www.home-assistant.io/integrations/binary_sensor/#device-class
+ * https://pictogrammers.com/library/mdi/
+ */
+#pragma once
+
+#include <WString.h>
+#include <functional>
+#include <vector>
+
+#define MYCILA_HA_VERSION "1.0.0"
+#define MYCILA_HA_VERSION_MAJOR 1
+#define MYCILA_HA_VERSION_MINOR 0
+#define MYCILA_HA_VERSION_REVISION 0
+
+#ifndef MYCILA_HA_DISCOVERY_TOPIC
+#define MYCILA_HA_DISCOVERY_TOPIC "homeassistant/discovery"
+#endif
+
+#ifndef MYCILA_HA_WILL_TOPIC
+#define MYCILA_HA_WILL_TOPIC "/status"
+#endif
+
+#ifndef MYCILA_HA_WILL_TOPIC
+#define MYCILA_HA_WILL_TOPIC "/status"
+#endif
+
+#ifndef MYCILA_HA_ONLINE
+#define MYCILA_HA_ONLINE "online"
+#endif
+
+#ifndef MYCILA_HA_OFFLINE
+#define MYCILA_HA_OFFLINE "offline"
+#endif
+
+#ifndef MYCILA_HA_SENSOR_EXPIRATION_TIME
+#define MYCILA_HA_SENSOR_EXPIRATION_TIME 0
+#endif
+
+namespace Mycila {
+  enum class HACategory { NONE,
+                          CONFIG,
+                          DIAGNOSTIC };
+
+  enum class HAStateClass { NONE,
+                            GAUGE,
+                            COUNTER,
+                            TOTAL };
+
+  enum class HANumberMode { AUTO,
+                            BOX,
+                            SLIDER };
+
+  typedef struct {
+      String id;
+      String name;
+      String version;
+      String model;
+      String manufacturer;
+      String url;
+  } HADevice;
+
+  class HAComponent {
+    public:
+      HAComponent(const char* type, const char* id, const char* name, const char* deviceClass = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE) : type(type), id(id), name(name), deviceClass(deviceClass), icon(icon), category(category) {}
+
+    public:
+      const char* type;
+      const char* id;
+      const char* name;
+      const char* deviceClass;
+      const char* icon;
+      const HACategory category;
+      HAStateClass stateClass = HAStateClass::NONE;
+      const char* unit = nullptr;
+      const char* stateTopic = nullptr;
+      const char* valueTemplate = nullptr;
+      const char* commandTopic = nullptr;
+      const char* pattern = nullptr;
+      const char* availabilityTopic = nullptr;
+      const char* payloadAvailable = nullptr;
+      const char* payloadNotAvailable = nullptr;
+      const char* payloadOn = nullptr;
+      const char* payloadOff = nullptr;
+      std::vector<const char*> options;
+      HANumberMode mode = HANumberMode::AUTO;
+      int min = 1;
+      int max = 100;
+      int step = 1;
+  };
+
+  class HAButton : public HAComponent {
+    public:
+      HAButton(const char* id, const char* name, const char* commandTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("button", id, name, deviceClass, icon, category) { this->commandTopic = commandTopic; }
+  };
+
+  class HASwitch : public HAComponent {
+    public:
+      HASwitch(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("switch", id, name, "switch", icon, category) {
+        this->commandTopic = commandTopic;
+        this->stateTopic = stateTopic;
+        this->payloadOn = payloadOn;
+        this->payloadOff = payloadOff;
+      }
+  };
+
+  class HASelect : public HAComponent {
+    public:
+      HASelect(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* icon = nullptr, const HACategory category = HACategory::NONE, const std::vector<const char*>& options = {}) : HAComponent("select", id, name, nullptr, icon, category) {
+        this->commandTopic = commandTopic;
+        this->stateTopic = stateTopic;
+        this->options = options;
+      }
+  };
+
+  class HATextField : public HAComponent {
+    public:
+      HATextField(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* pattern = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("text", id, name, nullptr, icon, category) {
+        this->commandTopic = commandTopic;
+        this->stateTopic = stateTopic;
+        this->pattern = pattern;
+      }
+  };
+
+  class HANumber : public HAComponent {
+    public:
+      HANumber(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const HANumberMode mode = HANumberMode::AUTO, const int min = 1, const int max = 100, const int step = 1, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("number", id, name, nullptr, icon, category) {
+        this->commandTopic = commandTopic;
+        this->stateTopic = stateTopic;
+        this->mode = mode;
+        this->min = min;
+        this->max = max;
+        this->step = step;
+      }
+  };
+
+  class HAOutlet : public HAComponent {
+    public:
+      HAOutlet(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("switch", id, name, "outlet", icon, category) {
+        this->commandTopic = commandTopic;
+        this->stateTopic = stateTopic;
+        this->payloadOn = payloadOn;
+        this->payloadOff = payloadOff;
+      }
+  };
+
+  class HAState : public HAComponent {
+    public:
+      HAState(const char* id, const char* name, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* deviceClass = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE)
+          : HAComponent("binary_sensor", id, name, deviceClass, icon, category) {
+        this->stateTopic = stateTopic;
+        this->payloadOn = payloadOn;
+        this->payloadOff = payloadOff;
+      }
+  };
+
+  class HASensor : public HAComponent {
+    public:
+      HASensor(const char* id, const char* name, const char* stateTopic, const HAStateClass stateClass = HAStateClass::NONE, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const HACategory category = HACategory::NONE)
+          : HAComponent("sensor", id, name, deviceClass, icon, category) {
+        this->unit = unit;
+        this->stateTopic = stateTopic;
+        this->stateClass = stateClass;
+      }
+  };
+
+  class HAGauge : public HASensor {
+    public:
+      HAGauge(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const HACategory category = HACategory::NONE, const char* valueTemplate = nullptr)
+          : HASensor(id, name, stateTopic, HAStateClass::GAUGE, deviceClass, icon, unit, category) {
+        this->valueTemplate = valueTemplate;
+      }
+  };
+
+  class HACounter : public HASensor {
+    public:
+      HACounter(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const HACategory category = HACategory::NONE, const char* valueTemplate = nullptr)
+          : HASensor(id, name, stateTopic, HAStateClass::COUNTER, deviceClass, icon, unit, category) {
+        this->valueTemplate = valueTemplate;
+      }
+  };
+
+  class HATotal : public HASensor {
+    public:
+      HATotal(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const HACategory category = HACategory::NONE)
+          : HASensor(id, name, stateTopic, HAStateClass::TOTAL, deviceClass, icon, unit, category) {}
+  };
+
+  class HAValue : public HASensor {
+    public:
+      HAValue(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE)
+          : HASensor(id, name, stateTopic, HAStateClass::NONE, deviceClass, icon, nullptr, category) {}
+  };
+
+  class HAText : public HASensor {
+    public:
+      HAText(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE, const char* valueTemplate = nullptr)
+          : HASensor(id, name, stateTopic, HAStateClass::NONE, deviceClass, icon, nullptr, category) {
+        this->valueTemplate = valueTemplate;
+      }
+  };
+
+  typedef std::function<void(const String& topic, const String& payload)> PublisherCallback;
+
+  class HADiscoveryClass {
+    public:
+      // REQUIRED: set device information used to publish
+      void setDevice(const HADevice& device) { _device = device; };
+
+      // REQUIRED: set base topic used to prepend all published component paths. This helps shorten the written code. usually this value is the base topic of your application in MQTT.
+      void setBaseTopic(const String& baseTopic) { _baseTopic = baseTopic; };
+
+      // REQUIRED: set MQTT publisher
+      void setPublisher(PublisherCallback publisher) { _publisher = publisher; };
+
+      // OPTIONAL: HA discovery topic, default to MYCILA_HA_DISCOVERY_TOPIC
+      void setDiscoveryTopic(const String& discoveryTopic) { _discoveryTopic = discoveryTopic; };
+
+      // OPTIONAL: set will topic (relative to base topic), default to MYCILA_HA_WILL_TOPIC. To disable, set to empty string.
+      void setWillTopic(const String& willTopic) { _willTopic = willTopic; };
+
+      // OPTIONAL: sensor expiration time in seconds, 0 for no expiration, default to MYCILA_HA_SENSOR_EXPIRATION_TIME
+      void setSensorExpirationTime(const uint32_t sensorExpirationTime) { _sensorExpirationTime = sensorExpirationTime; };
+
+      void publish(const HAComponent& component);
+
+    private:
+      HADevice _device;
+      String _baseTopic;
+      PublisherCallback _publisher = nullptr;
+      String _willTopic = MYCILA_HA_WILL_TOPIC;
+      String _discoveryTopic = MYCILA_HA_DISCOVERY_TOPIC;
+      uint32_t _sensorExpirationTime = MYCILA_HA_SENSOR_EXPIRATION_TIME;
+  };
+
+  extern HADiscoveryClass HADiscovery;
+} // namespace Mycila
