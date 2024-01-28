@@ -20,7 +20,7 @@ void setup() {
   Mycila::HADiscovery.setDevice({
     .id = "my-app-1234",
     .name = "My Application Name",
-    .version = "1.0.0",
+    .version = "1.0.1",
     .model = "OSS",
     .manufacturer = "Mathieu Carbou",
     .url = "http://" + WiFi.localIP().toString(),
