@@ -30,6 +30,7 @@ Setup:
 
 ```c++
   HADiscovery.setBaseTopic("/my-app");
+  HADiscovery.setWillTopic("/my-app/status");
 
   HADiscovery.setPublisher([](const String& topic, const String& payload) {
     // Here, you would call your mqttClient.publish() code

@@ -9,6 +9,7 @@ void setup() {
     continue;
 
   Mycila::HADiscovery.setBaseTopic("/my-app");
+  Mycila::HADiscovery.setWillTopic("/my-app/status");
 
   Mycila::HADiscovery.setPublisher([](const String& topic, const String& payload) {
     // Here, you would call your mqttClient.publish() code
