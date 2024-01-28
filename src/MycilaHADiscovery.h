@@ -23,22 +23,6 @@
 #define MYCILA_HA_DISCOVERY_TOPIC "homeassistant/discovery"
 #endif
 
-#ifndef MYCILA_HA_WILL_TOPIC
-#define MYCILA_HA_WILL_TOPIC "/status"
-#endif
-
-#ifndef MYCILA_HA_WILL_TOPIC
-#define MYCILA_HA_WILL_TOPIC "/status"
-#endif
-
-#ifndef MYCILA_HA_ONLINE
-#define MYCILA_HA_ONLINE "online"
-#endif
-
-#ifndef MYCILA_HA_OFFLINE
-#define MYCILA_HA_OFFLINE "offline"
-#endif
-
 #ifndef MYCILA_HA_SENSOR_EXPIRATION_TIME
 #define MYCILA_HA_SENSOR_EXPIRATION_TIME 0
 #endif
@@ -222,7 +206,7 @@ namespace Mycila {
       // OPTIONAL: HA discovery topic, default to MYCILA_HA_DISCOVERY_TOPIC
       void setDiscoveryTopic(const String& discoveryTopic) { _discoveryTopic = discoveryTopic; };
 
-      // OPTIONAL: set will topic (relative to base topic), default to MYCILA_HA_WILL_TOPIC. To disable, set to empty string.
+      // OPTIONAL: set will topic (absolute), default to empty string, which is disabled
       void setWillTopic(const String& willTopic) { _willTopic = willTopic; };
 
       // OPTIONAL: sensor expiration time in seconds, 0 for no expiration, default to MYCILA_HA_SENSOR_EXPIRATION_TIME
@@ -234,7 +218,7 @@ namespace Mycila {
       HADevice _device;
       String _baseTopic;
       PublisherCallback _publisher = nullptr;
-      String _willTopic = MYCILA_HA_WILL_TOPIC;
+      String _willTopic;
       String _discoveryTopic = MYCILA_HA_DISCOVERY_TOPIC;
       uint32_t _sensorExpirationTime = MYCILA_HA_SENSOR_EXPIRATION_TIME;
   };

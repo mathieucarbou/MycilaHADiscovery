@@ -34,7 +34,7 @@ void Mycila::HADiscoveryClass::publish(const HAComponent& component) {
 
   if (!component.availabilityTopic) {
     if (!_willTopic.isEmpty()) {
-      root["avty_t"] = _baseTopic + _willTopic;
+      root["avty_t"] = _willTopic;
     }
   } else {
     root["avty_mode"] = "all";
@@ -45,9 +45,9 @@ void Mycila::HADiscoveryClass::publish(const HAComponent& component) {
 #else
       JsonObject deviceAvail = array.add<JsonObject>();
 #endif
-      deviceAvail["topic"] = _baseTopic + _willTopic;
-      deviceAvail["pl_avail"] = MYCILA_HA_ONLINE;
-      deviceAvail["pl_not_avail"] = MYCILA_HA_OFFLINE;
+      deviceAvail["topic"] = _willTopic;
+      deviceAvail["pl_avail"] = "online";
+      deviceAvail["pl_not_avail"] = "offline";
     }
 #if ARDUINOJSON_VERSION_MAJOR == 6
     JsonObject compAvail = array.createNestedObject();
