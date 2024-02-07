@@ -32,6 +32,7 @@
       "library.json",
       "library.properties",
       "LICENSE",
+      "platformio.ini",
       "README.md"
     ]
   }
