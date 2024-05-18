@@ -7,7 +7,21 @@
 #include <ArduinoJson.h>
 #include <functional>
 
-#define TAG "HA-DISCO"
+#ifdef MYCILA_LOGGER_SUPPORT
+#include <MycilaLogger.h>
+extern Mycila::Logger logger;
+#define LOGD(tag, format, ...) logger.debug(tag, format, ##__VA_ARGS__)
+#define LOGI(tag, format, ...) logger.info(tag, format, ##__VA_ARGS__)
+#define LOGW(tag, format, ...) logger.warn(tag, format, ##__VA_ARGS__)
+#define LOGE(tag, format, ...) logger.error(tag, format, ##__VA_ARGS__)
+#else
+#define LOGD(tag, format, ...) ESP_LOGD(tag, format, ##__VA_ARGS__)
+#define LOGI(tag, format, ...) ESP_LOGI(tag, format, ##__VA_ARGS__)
+#define LOGW(tag, format, ...) ESP_LOGW(tag, format, ##__VA_ARGS__)
+#define LOGE(tag, format, ...) ESP_LOGE(tag, format, ##__VA_ARGS__)
+#endif
+
+#define TAG "HA"
 
 void Mycila::HADiscovery::publish(const HAComponent& component) {
   if (_discoveryTopic.isEmpty())
@@ -125,8 +139,13 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
   deviceObj["sw"] = _device.version.c_str();
   deviceObj["cu"] = _device.url.c_str();
 
+  String topic = _discoveryTopic + "/" + component.type + "/" + _device.id + "/" + component.id + "/config";
+
+  LOGD(TAG, "Publishing Home Assistant Discovery configuration to: %s", topic.c_str());
+
   String output;
   output.reserve(measureJson(root));
   serializeJson(root, output);
-  _publisher(_discoveryTopic + "/" + component.type + "/" + _device.id + "/" + component.id + "/config", output);
+
+  _publisher(topic, output);
 }
