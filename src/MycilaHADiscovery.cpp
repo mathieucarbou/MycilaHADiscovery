@@ -141,7 +141,7 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
 
   String topic = _discoveryTopic + "/" + component.type + "/" + _device.id + "/" + component.id + "/config";
 
-  LOGD(TAG, "Publishing Home Assistant Discovery configuration to: %s", topic.c_str());
+  LOGD(TAG, "%s", topic.c_str());
 
   String output;
   output.reserve(measureJson(root));
