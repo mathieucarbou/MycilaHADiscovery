@@ -9,7 +9,7 @@
 
 #define TAG "HA-DISCO"
 
-void Mycila::HADiscoveryClass::publish(const HAComponent& component) {
+void Mycila::HADiscovery::publish(const HAComponent& component) {
   if (_discoveryTopic.isEmpty())
     return;
 
@@ -130,7 +130,3 @@ void Mycila::HADiscoveryClass::publish(const HAComponent& component) {
   serializeJson(root, output);
   _publisher(_discoveryTopic + "/" + component.type + "/" + _device.id + "/" + component.id + "/config", output);
 }
-
-namespace Mycila {
-  HADiscoveryClass HADiscovery;
-} // namespace Mycila

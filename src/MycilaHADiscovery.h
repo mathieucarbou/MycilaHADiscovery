@@ -192,7 +192,7 @@ namespace Mycila {
 
   typedef std::function<void(const String& topic, const String& payload)> PublisherCallback;
 
-  class HADiscoveryClass {
+  class HADiscovery {
     public:
       // REQUIRED: set device information used to publish
       void setDevice(const HADevice& device) { _device = device; };
@@ -222,6 +222,4 @@ namespace Mycila {
       String _discoveryTopic = MYCILA_HA_DISCOVERY_TOPIC;
       uint32_t _sensorExpirationTime = MYCILA_HA_SENSOR_EXPIRATION_TIME;
   };
-
-  extern HADiscoveryClass HADiscovery;
 } // namespace Mycila
