@@ -52,6 +52,7 @@ Setup:
 Then query state:
 
 ```c++
+  haDiscovery.begin();
 
   // some diagnostic info
   haDiscovery.publish(HAButton("restart", "Restart", "/system/restart", "restart", nullptr, HACategory::DIAGNOSTIC));
@@ -73,4 +74,6 @@ Then query state:
   relay1Commute.payloadAvailable = "true";
   relay1Commute.payloadNotAvailable = "false";
   haDiscovery.publish(relay1Commute);
+
+  haDiscovery.end();
 ```

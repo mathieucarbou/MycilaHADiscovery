@@ -8,20 +8,41 @@
 #include <functional>
 
 #ifdef MYCILA_LOGGER_SUPPORT
-#include <MycilaLogger.h>
+  #include <MycilaLogger.h>
 extern Mycila::Logger logger;
-#define LOGD(tag, format, ...) logger.debug(tag, format, ##__VA_ARGS__)
-#define LOGI(tag, format, ...) logger.info(tag, format, ##__VA_ARGS__)
-#define LOGW(tag, format, ...) logger.warn(tag, format, ##__VA_ARGS__)
-#define LOGE(tag, format, ...) logger.error(tag, format, ##__VA_ARGS__)
+  #define LOGD(tag, format, ...) logger.debug(tag, format, ##__VA_ARGS__)
+  #define LOGI(tag, format, ...) logger.info(tag, format, ##__VA_ARGS__)
+  #define LOGW(tag, format, ...) logger.warn(tag, format, ##__VA_ARGS__)
+  #define LOGE(tag, format, ...) logger.error(tag, format, ##__VA_ARGS__)
 #else
-#define LOGD(tag, format, ...) ESP_LOGD(tag, format, ##__VA_ARGS__)
-#define LOGI(tag, format, ...) ESP_LOGI(tag, format, ##__VA_ARGS__)
-#define LOGW(tag, format, ...) ESP_LOGW(tag, format, ##__VA_ARGS__)
-#define LOGE(tag, format, ...) ESP_LOGE(tag, format, ##__VA_ARGS__)
+  #define LOGD(tag, format, ...) ESP_LOGD(tag, format, ##__VA_ARGS__)
+  #define LOGI(tag, format, ...) ESP_LOGI(tag, format, ##__VA_ARGS__)
+  #define LOGW(tag, format, ...) ESP_LOGW(tag, format, ##__VA_ARGS__)
+  #define LOGE(tag, format, ...) ESP_LOGE(tag, format, ##__VA_ARGS__)
 #endif
 
 #define TAG "HA"
+
+void Mycila::HADiscovery::setDevice(const HADevice& device) {
+  _device = device;
+}
+
+void Mycila::HADiscovery::begin() {
+  // cache device
+  JsonDocument doc;
+  JsonObject json = doc.to<JsonObject>();
+  json["name"] = _device.name.c_str();
+  json["ids"] = _device.id.c_str();
+  json["mf"] = _device.manufacturer.c_str();
+  json["mdl"] = _device.model.c_str();
+  json["sw"] = _device.version.c_str();
+  json["cu"] = _device.url.c_str();
+  _deviceJsonCache.reserve(measureJson(json));
+  serializeJson(json, _deviceJsonCache);
+
+  // prepare buffer
+  _buffer.reserve(_bufferSise);
+}
 
 void Mycila::HADiscovery::publish(const HAComponent& component) {
   if (_discoveryTopic.isEmpty())
@@ -48,7 +69,7 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
 
   if (!component.availabilityTopic) {
     if (!_willTopic.isEmpty()) {
-      root["avty_t"] = _willTopic;
+      root["avty_t"] = _willTopic.c_str();
     }
   } else {
     root["avty_mode"] = "all";
@@ -59,7 +80,7 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
 #else
       JsonObject deviceAvail = array.add<JsonObject>();
 #endif
-      deviceAvail["topic"] = _willTopic;
+      deviceAvail["topic"] = _willTopic.c_str();
       deviceAvail["pl_avail"] = "online";
       deviceAvail["pl_not_avail"] = "offline";
     }
@@ -130,22 +151,19 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
       opts.add(opt);
   }
 
-  // device
-  JsonObject deviceObj = root["dev"].to<JsonObject>();
-  deviceObj["name"] = _device.name.c_str();
-  deviceObj["ids"] = _device.id.c_str();
-  deviceObj["mf"] = _device.manufacturer.c_str();
-  deviceObj["mdl"] = _device.model.c_str();
-  deviceObj["sw"] = _device.version.c_str();
-  deviceObj["cu"] = _device.url.c_str();
+  _buffer.clear();
+  serializeJson(root, _buffer);
+  _buffer.setCharAt(_buffer.length() - 1, ',');
+  _buffer += "\"dev\":";
+  _buffer += _deviceJsonCache;
+  _buffer += "}";
 
   String topic = _discoveryTopic + "/" + component.type + "/" + _device.id + "/" + component.id + "/config";
+  LOGD(TAG, "%s [%d b]", topic.c_str(), _buffer.length());
+  _publisher(topic, _buffer);
+}
 
-  LOGD(TAG, "%s", topic.c_str());
-
-  String output;
-  output.reserve(measureJson(root));
-  serializeJson(root, output);
-
-  _publisher(topic, output);
+void Mycila::HADiscovery::end() {
+  _deviceJsonCache = String();
+  _buffer = String();
 }

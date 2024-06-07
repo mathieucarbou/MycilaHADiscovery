@@ -14,17 +14,17 @@
 #include <functional>
 #include <vector>
 
-#define MYCILA_HA_VERSION "2.1.1"
-#define MYCILA_HA_VERSION_MAJOR 2
-#define MYCILA_HA_VERSION_MINOR 1
+#define MYCILA_HA_VERSION          "2.1.1"
+#define MYCILA_HA_VERSION_MAJOR    2
+#define MYCILA_HA_VERSION_MINOR    1
 #define MYCILA_HA_VERSION_REVISION 1
 
 #ifndef MYCILA_HA_DISCOVERY_TOPIC
-#define MYCILA_HA_DISCOVERY_TOPIC "homeassistant/discovery"
+  #define MYCILA_HA_DISCOVERY_TOPIC "homeassistant/discovery"
 #endif
 
 #ifndef MYCILA_HA_SENSOR_EXPIRATION_TIME
-#define MYCILA_HA_SENSOR_EXPIRATION_TIME 0
+  #define MYCILA_HA_SENSOR_EXPIRATION_TIME 0
 #endif
 
 namespace Mycila {
@@ -195,7 +195,7 @@ namespace Mycila {
   class HADiscovery {
     public:
       // REQUIRED: set device information used to publish
-      void setDevice(const HADevice& device) { _device = device; };
+      void setDevice(const HADevice& device);
 
       // REQUIRED: set base topic used to prepend all published component paths. This helps shorten the written code. usually this value is the base topic of your application in MQTT.
       void setBaseTopic(const String& baseTopic) { _baseTopic = baseTopic; };
@@ -212,7 +212,16 @@ namespace Mycila {
       // OPTIONAL: sensor expiration time in seconds, 0 for no expiration, default to MYCILA_HA_SENSOR_EXPIRATION_TIME
       void setSensorExpirationTime(const uint32_t sensorExpirationTime) { _sensorExpirationTime = sensorExpirationTime; };
 
+      // Set the re-used buffer size for JSON serialization, defaults to 1024
+      void setBufferSise(const size_t bufferSise) { _bufferSise = bufferSise; };
+
+      // called each time before publishing components
+      // will prepare the buffers
+      void begin();
       void publish(const HAComponent& component);
+      // called after all components are published
+      // will clear the buffers
+      void end();
 
     private:
       HADevice _device;
@@ -221,5 +230,8 @@ namespace Mycila {
       String _willTopic;
       String _discoveryTopic = MYCILA_HA_DISCOVERY_TOPIC;
       uint32_t _sensorExpirationTime = MYCILA_HA_SENSOR_EXPIRATION_TIME;
+      String _deviceJsonCache;
+      size_t _bufferSise = 1024;
+      String _buffer;
   };
 } // namespace Mycila
