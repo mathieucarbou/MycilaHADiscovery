@@ -44,7 +44,7 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
 
   root["name"] = component.name;
   root["uniq_id"] = _device.id + "_" + component.id;
-  root["object_id"] = _device.id + "_" + component.id;
+  root["obj_id"] = _device.id + "_" + component.id;
 
   if (!component.availabilityTopic) {
     if (!_willTopic.isEmpty()) {
