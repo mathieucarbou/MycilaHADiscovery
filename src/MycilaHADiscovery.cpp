@@ -154,9 +154,9 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
   _buffer.clear();
   serializeJson(root, _buffer);
   _buffer.setCharAt(_buffer.length() - 1, ',');
-  _buffer += "\"dev\":";
-  _buffer += _deviceJsonCache;
-  _buffer += "}";
+  _buffer.concat("\"dev\":");
+  _buffer.concat(_deviceJsonCache);
+  _buffer.concat("}");
 
   String topic = _discoveryTopic + "/" + component.type + "/" + _device.id + "/" + component.id + "/config";
   LOGD(TAG, "%s [%d b]", topic.c_str(), _buffer.length());
