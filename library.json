@@ -1,6 +1,6 @@
 {
   "name": "MycilaHADiscovery",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Simple and efficient Home Assistant Discovery library for Arduino / ESP32",
   "homepage": "https://github.com/mathieucarbou/MycilaHADiscovery",
   "repository": {
