@@ -74,9 +74,9 @@ namespace Mycila {
       const char* payloadOff = nullptr;
       std::vector<const char*> options;
       HANumberMode mode = HANumberMode::AUTO;
-      int min = 1;
-      int max = 100;
-      int step = 1;
+      float min = 0;
+      float max = 100;
+      float step = 1;
   };
 
   class HAButton : public HAComponent {
@@ -114,7 +114,7 @@ namespace Mycila {
 
   class HANumber : public HAComponent {
     public:
-      HANumber(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const HANumberMode mode = HANumberMode::AUTO, const int min = 1, const int max = 100, const int step = 1, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("number", id, name, nullptr, icon, category) {
+      HANumber(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const HANumberMode mode = HANumberMode::AUTO, const float min = 0, const float max = 100, const float step = 1, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("number", id, name, nullptr, icon, category) {
         this->commandTopic = commandTopic;
         this->stateTopic = stateTopic;
         this->mode = mode;
