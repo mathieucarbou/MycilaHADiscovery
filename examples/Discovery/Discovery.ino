@@ -13,7 +13,7 @@ void setup() {
   haDiscovery.setBaseTopic("/my-app");
   haDiscovery.setWillTopic("/my-app/status");
 
-  haDiscovery.setPublisher([](const String& topic, const String& payload) {
+  haDiscovery.setPublisher([](const char* topic, const char* payload) {
     // Here, you would call your mqttClient.publish() code
     Serial.println(topic);
     Serial.println(payload);

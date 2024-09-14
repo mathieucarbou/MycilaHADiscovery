@@ -190,7 +190,7 @@ namespace Mycila {
       }
   };
 
-  typedef std::function<void(const String& topic, const String& payload)> PublisherCallback;
+  typedef std::function<void(const char* topic, const char* payload)> PublisherCallback;
 
   class HADiscovery {
     public:
@@ -198,16 +198,16 @@ namespace Mycila {
       void setDevice(const HADevice& device);
 
       // REQUIRED: set base topic used to prepend all published component paths. This helps shorten the written code. usually this value is the base topic of your application in MQTT.
-      void setBaseTopic(const String& baseTopic) { _baseTopic = baseTopic; };
+      void setBaseTopic(const char* baseTopic) { _baseTopic = baseTopic; };
 
       // REQUIRED: set MQTT publisher
       void setPublisher(PublisherCallback publisher) { _publisher = publisher; };
 
       // OPTIONAL: HA discovery topic, default to MYCILA_HA_DISCOVERY_TOPIC
-      void setDiscoveryTopic(const String& discoveryTopic) { _discoveryTopic = discoveryTopic; };
+      void setDiscoveryTopic(const char* discoveryTopic) { _discoveryTopic = discoveryTopic; };
 
       // OPTIONAL: set will topic (absolute), default to empty string, which is disabled
-      void setWillTopic(const String& willTopic) { _willTopic = willTopic; };
+      void setWillTopic(const char* willTopic) { _willTopic = willTopic; };
 
       // OPTIONAL: sensor expiration time in seconds, 0 for no expiration, default to MYCILA_HA_SENSOR_EXPIRATION_TIME
       void setSensorExpirationTime(const uint32_t sensorExpirationTime) { _sensorExpirationTime = sensorExpirationTime; };

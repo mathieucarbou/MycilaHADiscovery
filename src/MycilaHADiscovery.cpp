@@ -158,9 +158,19 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
   _buffer.concat(_deviceJsonCache);
   _buffer.concat("}");
 
-  String topic = _discoveryTopic + "/" + component.type + "/" + _device.id + "/" + component.id + "/config";
+  String topic;
+  topic.reserve(_discoveryTopic.length() + 1 + strlen(component.type) + 1 + _device.id.length() + 1 + strlen(component.id) + 7);
+  topic.concat(_discoveryTopic);
+  topic.concat('/');
+  topic.concat(component.type);
+  topic.concat('/');
+  topic.concat(_device.id);
+  topic.concat('/');
+  topic.concat(component.id);
+  topic.concat("/config");
+
   LOGD(TAG, "%s [%d b]", topic.c_str(), _buffer.length());
-  _publisher(topic, _buffer);
+  _publisher(topic.c_str(), _buffer.c_str());
 }
 
 void Mycila::HADiscovery::end() {
