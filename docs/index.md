@@ -31,7 +31,7 @@ Setup:
 ```c++
   haDiscovery.setWillTopic("/my-app/status");
 
-  // begin takes the HADevice, base topic and a callback to publish messages
+  // begin takes the Device, base topic and a callback to publish messages
   haDiscovery.begin({
                       .id = "my-app-1234",
                       .name = "My Application Name",
@@ -52,21 +52,21 @@ Then query state:
   haDiscovery.begin();
 
   // some diagnostic info
-  haDiscovery.publish(HAButton("restart", "Restart", "/system/restart", "restart", nullptr, HACategory::DIAGNOSTIC));
-  haDiscovery.publish(HACounter("uptime", "Uptime", "/system/uptime", "duration", nullptr, "s", HACategory::DIAGNOSTIC));
-  haDiscovery.publish(HAGauge("memory_used", "Memory Used", "/system/heap_used", "data_size", "mdi:memory", "B", HACategory::DIAGNOSTIC));
-  haDiscovery.publish(HAState("ntp", "NTP", "/ntp/synced", "true", "false", "connectivity", nullptr, HACategory::DIAGNOSTIC));
-  haDiscovery.publish(HAText("hostname", "Hostname", "/config/hostname", nullptr, "mdi:lan", HACategory::DIAGNOSTIC));
+  haDiscovery.publish(Button("restart", "Restart", "/system/restart", "restart", nullptr, Category::DIAGNOSTIC));
+  haDiscovery.publish(Counter("uptime", "Uptime", "/system/uptime", "duration", nullptr, "s", Category::DIAGNOSTIC));
+  haDiscovery.publish(Gauge("memory_used", "Memory Used", "/system/heap_used", "data_size", "mdi:memory", "B", Category::DIAGNOSTIC));
+  haDiscovery.publish(State("ntp", "NTP", "/ntp/synced", "true", "false", "connectivity", nullptr, Category::DIAGNOSTIC));
+  haDiscovery.publish(Value("hostname", "Hostname", "/config/hostname", nullptr, "mdi:lan", Category::DIAGNOSTIC));
 
   // some configuration
-  haDiscovery.publish(HATextField("mqtt_publish_interval", "MQTT Publish Interval", "/config/mqtt_interval/set", "/config/mqtt_interval", "^\\d+$", "mdi:timer-sand", HACategory::CONFIG));
-  haDiscovery.publish(HANumber("relay1_power_threshold", "Relay 1 Power Threshold", "/config/rel1_power/set", "/config/rel1_power", HANumberMode::SLIDER, 0, 3000, 50, "mdi:flash", HACategory::CONFIG));
-  haDiscovery.publish(HASwitch("output1_auto_bypass_enable", "Output 1 Auto Bypass", "/config/switch/set", "/config/switch", "true", "false", "mdi:water-boiler-auto", HACategory::CONFIG));
-  haDiscovery.publish(HASelect("day", "Day", "/config/day/set", "/config/day", nullptr, HACategory::CONFIG, {"mon", "tue", "wed", "thu", "fri", "sat", "sun"}));
+  haDiscovery.publish(Text("mqtt_publish_interval", "MQTT Publish Interval", "/config/mqtt_interval/set", "/config/mqtt_interval", "^\\d+$", "mdi:timer-sand", Category::CONFIG));
+  haDiscovery.publish(Number("relay1_power_threshold", "Relay 1 Power Threshold", "/config/rel1_power/set", "/config/rel1_power", NumberMode::SLIDER, 0, 3000, 50, "mdi:flash", Category::CONFIG));
+  haDiscovery.publish(Switch("output1_auto_bypass_enable", "Output 1 Auto Bypass", "/config/switch/set", "/config/switch", "true", "false", "mdi:water-boiler-auto", Category::CONFIG));
+  haDiscovery.publish(Select("day", "Day", "/config/day/set", "/config/day", nullptr, Category::CONFIG, {"mon", "tue", "wed", "thu", "fri", "sat", "sun"}));
 
   // some sensors
-  haDiscovery.publish(HAState("grid", "Grid Electricity", "/grid/online", "true", "false", "connectivity"));
-  HAOutlet relay1Commute("rel_commute", "Relay 1", "/relays/rel1/state/set", "/relays/rel1/state", "on", "off");
+  haDiscovery.publish(State("grid", "Grid Electricity", "/grid/online", "true", "false", "connectivity"));
+  Outlet relay1Commute("rel_commute", "Relay 1", "/relays/rel1/state/set", "/relays/rel1/state", "on", "off");
   relay1Commute.availabilityTopic = "/relays/rel1/enabled";
   relay1Commute.payloadAvailable = "true";
   relay1Commute.payloadNotAvailable = "false";

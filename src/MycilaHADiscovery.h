@@ -28,200 +28,209 @@
 #endif
 
 namespace Mycila {
-  enum class HACategory { NONE,
+  namespace HA {
+    enum class Category { NONE,
                           CONFIG,
                           DIAGNOSTIC };
 
-  enum class HAStateClass { NONE,
+    enum class StateClass { NONE,
                             GAUGE,
                             COUNTER,
                             TOTAL };
 
-  enum class HANumberMode { AUTO,
+    enum class NumberMode { AUTO,
                             BOX,
                             SLIDER };
 
-  typedef struct {
-      String id;
-      String name;
-      String version;
-      String model;
-      String manufacturer;
-      String url;
-  } HADevice;
+    typedef struct {
+        String id;
+        String name;
+        String version;
+        String model;
+        String manufacturer;
+        String url;
+    } Device;
 
-  class HAComponent {
-    public:
-      HAComponent(const char* type, const char* id, const char* name, const char* deviceClass = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE) : type(type), id(id), name(name), deviceClass(deviceClass), icon(icon), category(category) {}
+    class Component {
+      public:
+        Component(const char* type, const char* id, const char* name, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : type(type), id(id), name(name), deviceClass(deviceClass), icon(icon), category(category) {}
 
-    public:
-      const char* type;
-      const char* id;
-      const char* name;
-      const char* deviceClass;
-      const char* icon;
-      const HACategory category;
-      HAStateClass stateClass = HAStateClass::NONE;
-      const char* unit = nullptr;
-      const char* stateTopic = nullptr;
-      const char* valueTemplate = nullptr;
-      const char* commandTopic = nullptr;
-      const char* pattern = nullptr;
-      const char* availabilityTopic = nullptr;
-      const char* payloadAvailable = nullptr;
-      const char* payloadNotAvailable = nullptr;
-      const char* payloadOn = nullptr;
-      const char* payloadOff = nullptr;
-      std::vector<const char*> options;
-      HANumberMode mode = HANumberMode::AUTO;
-      float min = 0;
-      float max = 100;
-      float step = 1;
-  };
+      public:
+        const char* type;
+        const char* id;
+        const char* name;
+        const char* deviceClass;
+        const char* icon;
+        const Category category;
+        StateClass stateClass = StateClass::NONE;
+        const char* unit = nullptr;
+        const char* stateTopic = nullptr;
+        const char* valueTemplate = nullptr;
+        const char* commandTopic = nullptr;
+        const char* pattern = nullptr;
+        const char* availabilityTopic = nullptr;
+        const char* payloadAvailable = nullptr;
+        const char* payloadNotAvailable = nullptr;
+        const char* payloadOn = nullptr;
+        const char* payloadOff = nullptr;
+        std::vector<const char*> options;
+        NumberMode mode = NumberMode::AUTO;
+        float min = 0;
+        float max = 100;
+        float step = 1;
+    };
 
-  class HAButton : public HAComponent {
-    public:
-      HAButton(const char* id, const char* name, const char* commandTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("button", id, name, deviceClass, icon, category) { this->commandTopic = commandTopic; }
-  };
+    // https://www.home-assistant.io/integrations/button.mqtt/
+    class Button : public Component {
+      public:
+        Button(const char* id, const char* name, const char* commandTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : Component("button", id, name, deviceClass, icon, category) { this->commandTopic = commandTopic; }
+    };
 
-  class HASwitch : public HAComponent {
-    public:
-      HASwitch(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("switch", id, name, "switch", icon, category) {
-        this->commandTopic = commandTopic;
-        this->stateTopic = stateTopic;
-        this->payloadOn = payloadOn;
-        this->payloadOff = payloadOff;
-      }
-  };
+    // https://www.home-assistant.io/integrations/switch.mqtt/ (switch)
+    class Switch : public Component {
+      public:
+        Switch(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* icon = nullptr, const Category category = Category::NONE) : Component("switch", id, name, "switch", icon, category) {
+          this->commandTopic = commandTopic;
+          this->stateTopic = stateTopic;
+          this->payloadOn = payloadOn;
+          this->payloadOff = payloadOff;
+        }
+    };
 
-  class HASelect : public HAComponent {
-    public:
-      HASelect(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* icon = nullptr, const HACategory category = HACategory::NONE, const std::vector<const char*>& options = {}) : HAComponent("select", id, name, nullptr, icon, category) {
-        this->commandTopic = commandTopic;
-        this->stateTopic = stateTopic;
-        this->options = options;
-      }
-  };
+    // https://www.home-assistant.io/integrations/switch.mqtt/ (outlet)
+    class Outlet : public Component {
+      public:
+        Outlet(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* icon = nullptr, const Category category = Category::NONE) : Component("switch", id, name, "outlet", icon, category) {
+          this->commandTopic = commandTopic;
+          this->stateTopic = stateTopic;
+          this->payloadOn = payloadOn;
+          this->payloadOff = payloadOff;
+        }
+    };
 
-  class HATextField : public HAComponent {
-    public:
-      HATextField(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* pattern = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("text", id, name, nullptr, icon, category) {
-        this->commandTopic = commandTopic;
-        this->stateTopic = stateTopic;
-        this->pattern = pattern;
-      }
-  };
+    // https://www.home-assistant.io/integrations/select.mqtt/
+    class Select : public Component {
+      public:
+        Select(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* icon = nullptr, const Category category = Category::NONE, const std::vector<const char*>& options = {}) : Component("select", id, name, nullptr, icon, category) {
+          this->commandTopic = commandTopic;
+          this->stateTopic = stateTopic;
+          this->options = options;
+        }
+    };
 
-  class HANumber : public HAComponent {
-    public:
-      HANumber(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const HANumberMode mode = HANumberMode::AUTO, const float min = 0, const float max = 100, const float step = 1, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("number", id, name, nullptr, icon, category) {
-        this->commandTopic = commandTopic;
-        this->stateTopic = stateTopic;
-        this->mode = mode;
-        this->min = min;
-        this->max = max;
-        this->step = step;
-      }
-  };
+    // https://www.home-assistant.io/integrations/text.mqtt/
+    class Text : public Component {
+      public:
+        Text(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* pattern = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : Component("text", id, name, nullptr, icon, category) {
+          this->commandTopic = commandTopic;
+          this->stateTopic = stateTopic;
+          this->pattern = pattern;
+        }
+    };
 
-  class HAOutlet : public HAComponent {
-    public:
-      HAOutlet(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* icon = nullptr, const HACategory category = HACategory::NONE) : HAComponent("switch", id, name, "outlet", icon, category) {
-        this->commandTopic = commandTopic;
-        this->stateTopic = stateTopic;
-        this->payloadOn = payloadOn;
-        this->payloadOff = payloadOff;
-      }
-  };
+    // https://www.home-assistant.io/integrations/number.mqtt/
+    class Number : public Component {
+      public:
+        Number(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const NumberMode mode = NumberMode::AUTO, const float min = 0, const float max = 100, const float step = 1, const char* icon = nullptr, const Category category = Category::NONE) : Component("number", id, name, nullptr, icon, category) {
+          this->commandTopic = commandTopic;
+          this->stateTopic = stateTopic;
+          this->mode = mode;
+          this->min = min;
+          this->max = max;
+          this->step = step;
+        }
+    };
 
-  class HAState : public HAComponent {
-    public:
-      HAState(const char* id, const char* name, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* deviceClass = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE)
-          : HAComponent("binary_sensor", id, name, deviceClass, icon, category) {
-        this->stateTopic = stateTopic;
-        this->payloadOn = payloadOn;
-        this->payloadOff = payloadOff;
-      }
-  };
+    // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
+    class State : public Component {
+      public:
+        State(const char* id, const char* name, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE)
+            : Component("binary_sensor", id, name, deviceClass, icon, category) {
+          this->stateTopic = stateTopic;
+          this->payloadOn = payloadOn;
+          this->payloadOff = payloadOff;
+        }
+    };
 
-  class HASensor : public HAComponent {
-    public:
-      HASensor(const char* id, const char* name, const char* stateTopic, const HAStateClass stateClass = HAStateClass::NONE, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const HACategory category = HACategory::NONE)
-          : HAComponent("sensor", id, name, deviceClass, icon, category) {
-        this->unit = unit;
-        this->stateTopic = stateTopic;
-        this->stateClass = stateClass;
-      }
-  };
+    // https://www.home-assistant.io/integrations/sensor.mqtt/
+    class Sensor : public Component {
+      public:
+        Sensor(const char* id, const char* name, const char* stateTopic, const StateClass stateClass = StateClass::NONE, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE)
+            : Component("sensor", id, name, deviceClass, icon, category) {
+          this->unit = unit;
+          this->stateTopic = stateTopic;
+          this->stateClass = stateClass;
+        }
+    };
 
-  class HAGauge : public HASensor {
-    public:
-      HAGauge(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const HACategory category = HACategory::NONE, const char* valueTemplate = nullptr)
-          : HASensor(id, name, stateTopic, HAStateClass::GAUGE, deviceClass, icon, unit, category) {
-        this->valueTemplate = valueTemplate;
-      }
-  };
+    // https://www.home-assistant.io/integrations/sensor.mqtt/ (measurement)
+    class Gauge : public Sensor {
+      public:
+        Gauge(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
+            : Sensor(id, name, stateTopic, StateClass::GAUGE, deviceClass, icon, unit, category) {
+          this->valueTemplate = valueTemplate;
+        }
+    };
 
-  class HACounter : public HASensor {
-    public:
-      HACounter(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const HACategory category = HACategory::NONE, const char* valueTemplate = nullptr)
-          : HASensor(id, name, stateTopic, HAStateClass::COUNTER, deviceClass, icon, unit, category) {
-        this->valueTemplate = valueTemplate;
-      }
-  };
+    // https://www.home-assistant.io/integrations/sensor.mqtt/ (total_increasing)
+    class Counter : public Sensor {
+      public:
+        Counter(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
+            : Sensor(id, name, stateTopic, StateClass::COUNTER, deviceClass, icon, unit, category) {
+          this->valueTemplate = valueTemplate;
+        }
+    };
 
-  class HATotal : public HASensor {
-    public:
-      HATotal(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const HACategory category = HACategory::NONE)
-          : HASensor(id, name, stateTopic, HAStateClass::TOTAL, deviceClass, icon, unit, category) {}
-  };
+    // https://www.home-assistant.io/integrations/sensor.mqtt/ (total)
+    class Total : public Sensor {
+      public:
+        Total(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE)
+            : Sensor(id, name, stateTopic, StateClass::TOTAL, deviceClass, icon, unit, category) {}
+    };
 
-  class HAValue : public HASensor {
-    public:
-      HAValue(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE)
-          : HASensor(id, name, stateTopic, HAStateClass::NONE, deviceClass, icon, nullptr, category) {}
-  };
+    // https://www.home-assistant.io/integrations/sensor.mqtt/ (no state class)
+    class Value : public Sensor {
+      public:
+        Value(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
+            : Sensor(id, name, stateTopic, StateClass::NONE, deviceClass, icon, nullptr, category) {
+          this->valueTemplate = valueTemplate;
+        }
+    };
 
-  class HAText : public HASensor {
-    public:
-      HAText(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const HACategory category = HACategory::NONE, const char* valueTemplate = nullptr)
-          : HASensor(id, name, stateTopic, HAStateClass::NONE, deviceClass, icon, nullptr, category) {
-        this->valueTemplate = valueTemplate;
-      }
-  };
+    typedef std::function<void(const char* topic, const char* payload)> PublisherCallback;
 
-  typedef std::function<void(const char* topic, const char* payload)> PublisherCallback;
+    // https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
+    class Discovery {
+      public:
+        // OPTIONAL: HA discovery topic, default to MYCILA_HA_DISCOVERY_TOPIC
+        void setDiscoveryTopic(const char* discoveryTopic) { _discoveryTopic = discoveryTopic; };
 
-  class HADiscovery {
-    public:
-      // OPTIONAL: HA discovery topic, default to MYCILA_HA_DISCOVERY_TOPIC
-      void setDiscoveryTopic(const char* discoveryTopic) { _discoveryTopic = discoveryTopic; };
+        // OPTIONAL: set will topic (absolute), default to empty string, which is disabled
+        void setWillTopic(const char* willTopic) { _willTopic = willTopic; };
 
-      // OPTIONAL: set will topic (absolute), default to empty string, which is disabled
-      void setWillTopic(const char* willTopic) { _willTopic = willTopic; };
+        // OPTIONAL: sensor expiration time in seconds, 0 for no expiration, default to MYCILA_HA_SENSOR_EXPIRATION_TIME
+        void setSensorExpirationTime(const uint32_t sensorExpirationTime) { _sensorExpirationTime = sensorExpirationTime; };
 
-      // OPTIONAL: sensor expiration time in seconds, 0 for no expiration, default to MYCILA_HA_SENSOR_EXPIRATION_TIME
-      void setSensorExpirationTime(const uint32_t sensorExpirationTime) { _sensorExpirationTime = sensorExpirationTime; };
+        // called each time before publishing components
+        // will prepare the buffers
+        void begin(const Device& device, const char* baseTopic, const PublisherCallback publisher) { begin(device, baseTopic, 1024, publisher); }
+        void begin(const Device& device, const char* baseTopic, const size_t bufferSise, const PublisherCallback publisher);
 
-      // called each time before publishing components
-      // will prepare the buffers
-      void begin(const HADevice& device, const char* baseTopic, const PublisherCallback publisher) { begin(device, baseTopic, 1024, publisher); }
-      void begin(const HADevice& device, const char* baseTopic, const size_t bufferSise, const PublisherCallback publisher);
+        void publish(const Component& component);
 
-      void publish(const HAComponent& component);
+        // called after all components are published
+        // will clear the buffers
+        void end();
 
-      // called after all components are published
-      // will clear the buffers
-      void end();
-
-    private:
-      HADevice _device;
-      PublisherCallback _publisher = nullptr;
-      String _baseTopic;
-      String _buffer;
-      String _deviceJsonCache;
-      String _discoveryTopic = MYCILA_HA_DISCOVERY_TOPIC;
-      String _willTopic;
-      uint32_t _sensorExpirationTime = MYCILA_HA_SENSOR_EXPIRATION_TIME;
-  };
+      private:
+        Device _device;
+        PublisherCallback _publisher = nullptr;
+        String _baseTopic;
+        String _buffer;
+        String _deviceJsonCache;
+        String _discoveryTopic = MYCILA_HA_DISCOVERY_TOPIC;
+        String _willTopic;
+        uint32_t _sensorExpirationTime = MYCILA_HA_SENSOR_EXPIRATION_TIME;
+    };
+  } // namespace HA
 } // namespace Mycila

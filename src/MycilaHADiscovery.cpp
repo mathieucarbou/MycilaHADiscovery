@@ -9,7 +9,7 @@
 
 #ifdef MYCILA_LOGGER_SUPPORT
   #include <MycilaLogger.h>
-extern Mycila::Logger logger;
+extern Mycila::HA::Logger logger;
   #define LOGD(tag, format, ...) logger.debug(tag, format, ##__VA_ARGS__)
   #define LOGI(tag, format, ...) logger.info(tag, format, ##__VA_ARGS__)
   #define LOGW(tag, format, ...) logger.warn(tag, format, ##__VA_ARGS__)
@@ -23,7 +23,7 @@ extern Mycila::Logger logger;
 
 #define TAG "HA"
 
-void Mycila::HADiscovery::begin(const HADevice& device, const char* baseTopic, const size_t bufferSise, const PublisherCallback publisher) {
+void Mycila::HA::Discovery::begin(const Device& device, const char* baseTopic, const size_t bufferSise, const PublisherCallback publisher) {
   _device = device;
   _baseTopic = baseTopic;
   _publisher = publisher;
@@ -44,7 +44,7 @@ void Mycila::HADiscovery::begin(const HADevice& device, const char* baseTopic, c
   _buffer.reserve(bufferSise);
 }
 
-void Mycila::HADiscovery::publish(const HAComponent& component) {
+void Mycila::HA::Discovery::publish(const Component& component) {
   if (_discoveryTopic.isEmpty())
     return;
 
@@ -102,16 +102,16 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
   if (component.icon)
     root["ic"] = component.icon;
 
-  if (component.category == HACategory::CONFIG)
+  if (component.category == Category::CONFIG)
     root["ent_cat"] = "config";
-  if (component.category == HACategory::DIAGNOSTIC)
+  if (component.category == Category::DIAGNOSTIC)
     root["ent_cat"] = "diagnostic";
 
-  if (component.stateClass == HAStateClass::COUNTER)
+  if (component.stateClass == StateClass::COUNTER)
     root["stat_cla"] = "total_increasing";
-  if (component.stateClass == HAStateClass::GAUGE)
+  if (component.stateClass == StateClass::GAUGE)
     root["stat_cla"] = "measurement";
-  if (component.stateClass == HAStateClass::TOTAL)
+  if (component.stateClass == StateClass::TOTAL)
     root["stat_cla"] = "total";
 
   if (component.unit)
@@ -136,7 +136,7 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
     root["ptrn"] = component.pattern;
 
   if (strcmp(component.type, "number") == 0) {
-    root["mode"] = component.mode == HANumberMode::BOX ? "box" : (component.mode == HANumberMode::SLIDER ? "slider" : "auto");
+    root["mode"] = component.mode == NumberMode::BOX ? "box" : (component.mode == NumberMode::SLIDER ? "slider" : "auto");
     root["min"] = component.min;
     root["max"] = component.max;
     root["step"] = component.step;
@@ -173,7 +173,7 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
   _publisher(topic.c_str(), _buffer.c_str());
 }
 
-void Mycila::HADiscovery::end() {
+void Mycila::HA::Discovery::end() {
   _deviceJsonCache = emptyString;
   _buffer = emptyString;
   _publisher = nullptr;
