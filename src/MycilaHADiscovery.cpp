@@ -9,7 +9,7 @@
 
 #ifdef MYCILA_LOGGER_SUPPORT
   #include <MycilaLogger.h>
-extern Mycila::HA::Logger logger;
+extern Mycila::Logger logger;
   #define LOGD(tag, format, ...) logger.debug(tag, format, ##__VA_ARGS__)
   #define LOGI(tag, format, ...) logger.info(tag, format, ##__VA_ARGS__)
   #define LOGW(tag, format, ...) logger.warn(tag, format, ##__VA_ARGS__)

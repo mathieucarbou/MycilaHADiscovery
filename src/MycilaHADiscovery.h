@@ -2,22 +2,16 @@
 /*
  * Copyright (C) 2023-2024 Mathieu Carbou
  */
-
-/* https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
- * https://www.home-assistant.io/integrations/sensor/#device-class
- * https://www.home-assistant.io/integrations/binary_sensor/#device-class
- * https://pictogrammers.com/library/mdi/
- */
 #pragma once
 
 #include <WString.h>
 #include <functional>
 #include <vector>
 
-#define MYCILA_HA_VERSION          "5.0.0"
+#define MYCILA_HA_VERSION          "5.0.1"
 #define MYCILA_HA_VERSION_MAJOR    5
 #define MYCILA_HA_VERSION_MINOR    0
-#define MYCILA_HA_VERSION_REVISION 0
+#define MYCILA_HA_VERSION_REVISION 1
 
 #ifndef MYCILA_HA_DISCOVERY_TOPIC
   #define MYCILA_HA_DISCOVERY_TOPIC "homeassistant/discovery"
