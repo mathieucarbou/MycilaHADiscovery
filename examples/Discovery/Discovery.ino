@@ -10,23 +10,22 @@ void setup() {
   while (!Serial)
     continue;
 
-  haDiscovery.setBaseTopic("/my-app");
   haDiscovery.setWillTopic("/my-app/status");
 
-  haDiscovery.setPublisher([](const char* topic, const char* payload) {
-    // Here, you would call your mqttClient.publish() code
-    Serial.println(topic);
-    Serial.println(payload);
-  });
-
-  haDiscovery.setDevice({
-    .id = "my-app-1234",
-    .name = "My Application Name",
-    .version = "1.0.1",
-    .model = "OSS",
-    .manufacturer = "Mathieu Carbou",
-    .url = "http://" + WiFi.localIP().toString(),
-  });
+  haDiscovery.begin({
+                      .id = "my-app-1234",
+                      .name = "My Application Name",
+                      .version = "1.0.1",
+                      .model = "OSS",
+                      .manufacturer = "Mathieu Carbou",
+                      .url = "http://" + WiFi.localIP().toString(),
+                    },
+                    "/my-app",
+                    [](const char* topic, const char* payload) {
+                      // Here, you would call your mqttClient.publish() code
+                      Serial.println(topic);
+                      Serial.println(payload);
+                    });
 
   // some diagnostic info
   haDiscovery.publish(Mycila::HAButton("restart", "Restart", "/system/restart", "restart", nullptr, Mycila::HACategory::DIAGNOSTIC));

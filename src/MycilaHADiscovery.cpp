@@ -23,11 +23,11 @@ extern Mycila::Logger logger;
 
 #define TAG "HA"
 
-void Mycila::HADiscovery::setDevice(const HADevice& device) {
+void Mycila::HADiscovery::begin(const HADevice& device, const char* baseTopic, const size_t bufferSise, const PublisherCallback publisher) {
   _device = device;
-}
+  _baseTopic = baseTopic;
+  _publisher = publisher;
 
-void Mycila::HADiscovery::begin() {
   // cache device
   JsonDocument doc;
   JsonObject json = doc.to<JsonObject>();
@@ -41,7 +41,7 @@ void Mycila::HADiscovery::begin() {
   serializeJson(json, _deviceJsonCache);
 
   // prepare buffer
-  _buffer.reserve(_bufferSise);
+  _buffer.reserve(bufferSise);
 }
 
 void Mycila::HADiscovery::publish(const HAComponent& component) {
@@ -174,6 +174,7 @@ void Mycila::HADiscovery::publish(const HAComponent& component) {
 }
 
 void Mycila::HADiscovery::end() {
-  _deviceJsonCache = String();
-  _buffer = String();
+  _deviceJsonCache = emptyString;
+  _buffer = emptyString;
+  _publisher = nullptr;
 }
