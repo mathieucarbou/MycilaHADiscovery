@@ -14,8 +14,8 @@
 #include <functional>
 #include <vector>
 
-#define MYCILA_HA_VERSION          "3.0.0"
-#define MYCILA_HA_VERSION_MAJOR    3
+#define MYCILA_HA_VERSION          "4.0.0"
+#define MYCILA_HA_VERSION_MAJOR    4
 #define MYCILA_HA_VERSION_MINOR    0
 #define MYCILA_HA_VERSION_REVISION 0
 
