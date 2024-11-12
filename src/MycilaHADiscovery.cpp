@@ -5,7 +5,9 @@
 #include <MycilaHADiscovery.h>
 
 #include <ArduinoJson.h>
+
 #include <functional>
+#include <string>
 
 #ifdef MYCILA_LOGGER_SUPPORT
   #include <MycilaLogger.h>
@@ -45,16 +47,16 @@ void Mycila::HA::Discovery::begin(const Device& device, const char* baseTopic, c
 }
 
 void Mycila::HA::Discovery::publish(const Component& component) {
-  if (_discoveryTopic.isEmpty())
+  if (_discoveryTopic.empty())
     return;
 
-  if (_baseTopic.isEmpty())
+  if (_baseTopic.empty())
     return;
 
   if (!_publisher)
     return;
 
-  if (_device.id.isEmpty())
+  if (_device.id.empty())
     return;
 
 #if ARDUINOJSON_VERSION_MAJOR == 6
@@ -68,13 +70,13 @@ void Mycila::HA::Discovery::publish(const Component& component) {
   root["obj_id"] = _device.id + "_" + component.id;
 
   if (!component.availabilityTopic) {
-    if (!_willTopic.isEmpty()) {
+    if (!_willTopic.empty()) {
       root["avty_t"] = _willTopic.c_str();
     }
   } else {
     root["avty_mode"] = "all";
     JsonArray array = root["availability"].to<JsonArray>();
-    if (!_willTopic.isEmpty()) {
+    if (!_willTopic.empty()) {
 #if ARDUINOJSON_VERSION_MAJOR == 6
       JsonObject deviceAvail = array.createNestedObject();
 #else
@@ -153,28 +155,28 @@ void Mycila::HA::Discovery::publish(const Component& component) {
 
   _buffer.clear();
   serializeJson(root, _buffer);
-  _buffer.setCharAt(_buffer.length() - 1, ',');
-  _buffer.concat("\"dev\":");
-  _buffer.concat(_deviceJsonCache);
-  _buffer.concat("}");
+  _buffer[_buffer.length() - 1] = ',';
+  _buffer.append("\"dev\":");
+  _buffer.append(_deviceJsonCache);
+  _buffer.append("}");
 
-  String topic;
+  std::string topic;
   topic.reserve(_discoveryTopic.length() + 1 + strlen(component.type) + 1 + _device.id.length() + 1 + strlen(component.id) + 7);
-  topic.concat(_discoveryTopic);
-  topic.concat('/');
-  topic.concat(component.type);
-  topic.concat('/');
-  topic.concat(_device.id);
-  topic.concat('/');
-  topic.concat(component.id);
-  topic.concat("/config");
+  topic.append(_discoveryTopic);
+  topic.append("/");
+  topic.append(component.type);
+  topic.append("/");
+  topic.append(_device.id);
+  topic.append("/");
+  topic.append(component.id);
+  topic.append("/config");
 
   LOGD(TAG, "%s [%d b]", topic.c_str(), _buffer.length());
   _publisher(topic.c_str(), _buffer.c_str());
 }
 
 void Mycila::HA::Discovery::end() {
-  _deviceJsonCache = emptyString;
-  _buffer = emptyString;
+  _deviceJsonCache = {};
+  _buffer = {};
   _publisher = nullptr;
 }

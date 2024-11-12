@@ -18,7 +18,7 @@ void setup() {
                       .version = "1.0.1",
                       .model = "OSS",
                       .manufacturer = "Mathieu Carbou",
-                      .url = "http://" + WiFi.localIP().toString(),
+                      .url = std::string("http://") + WiFi.localIP().toString().c_str(),
                     },
                     "/my-app",
                     [](const char* topic, const char* payload) {

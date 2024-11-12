@@ -4,8 +4,8 @@
  */
 #pragma once
 
-#include <WString.h>
 #include <functional>
+#include <string>
 #include <vector>
 
 #define MYCILA_HA_VERSION          "5.0.1"
@@ -37,12 +37,12 @@ namespace Mycila {
                             SLIDER };
 
     typedef struct {
-        String id;
-        String name;
-        String version;
-        String model;
-        String manufacturer;
-        String url;
+        std::string id;
+        std::string name;
+        std::string version;
+        std::string model;
+        std::string manufacturer;
+        std::string url;
     } Device;
 
     class Component {
@@ -219,11 +219,11 @@ namespace Mycila {
       private:
         Device _device;
         PublisherCallback _publisher = nullptr;
-        String _baseTopic;
-        String _buffer;
-        String _deviceJsonCache;
-        String _discoveryTopic = MYCILA_HA_DISCOVERY_TOPIC;
-        String _willTopic;
+        std::string _baseTopic;
+        std::string _buffer;
+        std::string _deviceJsonCache;
+        std::string _discoveryTopic = MYCILA_HA_DISCOVERY_TOPIC;
+        std::string _willTopic;
         uint32_t _sensorExpirationTime = MYCILA_HA_SENSOR_EXPIRATION_TIME;
     };
   } // namespace HA
