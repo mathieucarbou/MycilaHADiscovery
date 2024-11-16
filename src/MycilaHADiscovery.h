@@ -6,6 +6,7 @@
 
 #include <functional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #define MYCILA_HA_VERSION          "6.0.1"
