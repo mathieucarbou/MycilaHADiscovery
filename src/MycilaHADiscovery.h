@@ -198,9 +198,13 @@ namespace Mycila {
       public:
         // OPTIONAL: HA discovery topic, default to MYCILA_HA_DISCOVERY_TOPIC
         void setDiscoveryTopic(const char* discoveryTopic) { _discoveryTopic = discoveryTopic; };
+        void setDiscoveryTopic(const std::string& discoveryTopic) { _discoveryTopic = discoveryTopic; };
+        void setDiscoveryTopic(std::string&& discoveryTopic) { _discoveryTopic = std::move(discoveryTopic); };
 
         // OPTIONAL: set will topic (absolute), default to empty string, which is disabled
         void setWillTopic(const char* willTopic) { _willTopic = willTopic; };
+        void setWillTopic(const std::string& willTopic) { _willTopic = willTopic; };
+        void setWillTopic(std::string&& willTopic) { _willTopic = std::move(willTopic); };
 
         // OPTIONAL: sensor expiration time in seconds, 0 for no expiration, default to MYCILA_HA_SENSOR_EXPIRATION_TIME
         void setSensorExpirationTime(const uint32_t sensorExpirationTime) { _sensorExpirationTime = sensorExpirationTime; };
