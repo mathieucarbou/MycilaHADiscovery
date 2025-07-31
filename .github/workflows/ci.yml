@@ -40,85 +40,65 @@ jobs:
             --filter=-whitespace/line_length,-whitespace/braces,-whitespace/comments,-runtime/indentation_namespace,-whitespace/indent,-readability/braces,-whitespace/newline,-readability/todo,-build/c++11 \
             src
 
-  arduino:
-    name: Arduino
+  platformio:
+    name: "pio:${{ matrix.env }}:${{ matrix.board }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-          - core: esp32:esp32
-            board: esp32:esp32:esp32
-            index_url: https://espressif.github.io/arduino-esp32/package_esp32_index.json
-          # - core: esp32:esp32
-          #   board: esp32:esp32:esp32
-          #   index_url: https://espressif.github.io/arduino-esp32/package_esp32_dev_index.json
+          - env: ci-arduino-2
+            board: esp32dev
+          - env: ci-arduino-2
+            board: esp32-s2-saola-1
+          - env: ci-arduino-2
+            board: esp32-s3-devkitc-1
+          - env: ci-arduino-2
+            board: esp32-c3-devkitc-02
+
+          - env: ci-arduino-3
+            board: esp32dev
+          - env: ci-arduino-3
+            board: esp32-s2-saola-1
+          - env: ci-arduino-3
+            board: esp32-s3-devkitc-1
+          - env: ci-arduino-3
+            board: esp32-c3-devkitc-02
+          - env: ci-arduino-3
+            board: esp32-c6-devkitc-1
+
+          # - env: ci-arduino-rc
+          #   board: esp32dev
+          # - env: ci-arduino-rc
+          #   board: esp32-s2-saola-1
+          # - env: ci-arduino-rc
+          #   board: esp32-s3-devkitc-1
+          # - env: ci-arduino-rc
+          #   board: esp32-c3-devkitc-02
+          # - env: ci-arduino-rc
+          #   board: esp32-c6-devkitc-1
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install arduino-cli
-        run: curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/usr/local/bin sh
-
-      - name: Update core index
-        run: arduino-cli core update-index --additional-urls "${{ matrix.index_url }}"
-
-      - name: Install core
-        run: arduino-cli core install --additional-urls "${{ matrix.index_url }}" ${{ matrix.core }}
-
-      - name: Install ArduinoJson
-        run: arduino-cli lib install ArduinoJson
-
-      - name: Build Discovery
-        run: arduino-cli compile --library . --warnings all -b ${{ matrix.board }} "examples/Discovery/Discovery.ino"
-
-  platformio:
-    name: pio ${{ matrix.name }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: esp32dev|arduino
-            board: esp32dev
-            platform: espressif32
-            opts:
-          - name: esp32dev|arduino-2
-            board: esp32dev
-            platform: espressif32@6.10.0
-            opts:
-          - name: esp32dev|arduino-3
-            board: esp32dev
-            platform: espressif32
-            opts: "--project-option 'platform=https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30-1/platform-espressif32.zip'"
-          - name: esp32-s3-devkitc-1|arduino
-            board: esp32-s3-devkitc-1
-            platform: espressif32
-            opts:
-          - name: esp32-s3-devkitc-1|arduino-2
-            board: esp32-s3-devkitc-1
-            platform: espressif32@6.10.0
-            opts:
-          - name: esp32-s3-devkitc-1|arduino-3
-            board: esp32-s3-devkitc-1
-            platform: espressif32
-            opts: "--project-option 'platform=https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30-1/platform-espressif32.zip'"
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up cache
+      - name: Cache PlatformIO
         uses: actions/cache@v4
         with:
+          key: ${{ runner.os }}-pio
           path: |
-            ~/.platformio
             ~/.cache/pip
-          key: ${{ matrix.name }}
-      - uses: actions/setup-python@v5
+            ~/.platformio
+
+      - name: Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.x"
-      - run: pip install platformio
-      - run: platformio platform install ${{ matrix.platform }}
-        
-      - name: Build Discovery
-        run: platformio ci "examples/Discovery/Discovery.ino" -l '.' -b ${{ matrix.board }} ${{ matrix.opts }}
+
+      - name: Build
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade platformio
+          pip install --upgrade cryptography
+      
+      - run: PLATFORMIO_SRC_DIR=examples/Discovery PIO_BOARD=${{ matrix.board }} pio run -e ${{ matrix.env }}
