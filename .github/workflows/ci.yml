@@ -91,7 +91,7 @@ jobs:
           - name: esp32dev|arduino-3
             board: esp32dev
             platform: espressif32
-            opts: "--project-option 'platform=https://github.com/pioarduino/platform-espressif32/releases/download/54.03.21/platform-espressif32.zip'"
+            opts: "--project-option 'platform=https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30-1/platform-espressif32.zip'"
           - name: esp32-s3-devkitc-1|arduino
             board: esp32-s3-devkitc-1
             platform: espressif32
@@ -103,7 +103,7 @@ jobs:
           - name: esp32-s3-devkitc-1|arduino-3
             board: esp32-s3-devkitc-1
             platform: espressif32
-            opts: "--project-option 'platform=https://github.com/pioarduino/platform-espressif32/releases/download/54.03.21/platform-espressif32.zip'"
+            opts: "--project-option 'platform=https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30-1/platform-espressif32.zip'"
 
     steps:
       - uses: actions/checkout@v4
