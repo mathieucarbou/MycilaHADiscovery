@@ -74,3 +74,5 @@ Then query state:
 
   haDiscovery.end();
 ```
+
+Usage example in YaSolR: https://github.com/mathieucarbou/YaSolR/blob/15df36c2ad80cea40efeaa763974280139f8becf/src/yasolr_mqtt.cpp#L379-L480
