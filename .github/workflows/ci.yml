@@ -47,15 +47,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - env: ci-arduino-2
-            board: esp32dev
-          - env: ci-arduino-2
-            board: esp32-s2-saola-1
-          - env: ci-arduino-2
-            board: esp32-s3-devkitc-1
-          - env: ci-arduino-2
-            board: esp32-c3-devkitc-02
-
           - env: ci-arduino-3
             board: esp32dev
           - env: ci-arduino-3
