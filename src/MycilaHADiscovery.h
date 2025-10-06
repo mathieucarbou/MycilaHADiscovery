@@ -193,7 +193,7 @@ namespace Mycila {
         }
     };
 
-    typedef std::function<void(const char* topic, const char* payload)> PublisherCallback;
+    typedef std::function<void(const char* topic, const std::string& payload)> PublisherCallback;
 
     // https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
     class Discovery {

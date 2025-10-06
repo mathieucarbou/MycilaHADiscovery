@@ -173,7 +173,7 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   topic.append("/config");
 
   LOGD(TAG, "%s [%d b]", topic.c_str(), _buffer.length());
-  _publisher(topic.c_str(), _buffer.c_str());
+  _publisher(topic.c_str(), _buffer);
 }
 
 void Mycila::HA::Discovery::end() {

@@ -21,10 +21,10 @@ void setup() {
                       .url = std::string("http://") + WiFi.localIP().toString().c_str(),
                     },
                     "/my-app",
-                    [](const char* topic, const char* payload) {
+                    [](const char* topic, const std::string& payload) {
                       // Here, you would call your mqttClient.publish() code
                       Serial.println(topic);
-                      Serial.println(payload);
+                      Serial.println(payload.c_str());
                     });
 
   // some diagnostic info
