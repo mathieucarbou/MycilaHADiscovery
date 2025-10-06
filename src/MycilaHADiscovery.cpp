@@ -8,7 +8,7 @@
 
 #include <functional>
 #include <string>
-#include <utility> 
+#include <utility>
 
 #ifdef MYCILA_LOGGER_SUPPORT
   #include <MycilaLogger.h>
