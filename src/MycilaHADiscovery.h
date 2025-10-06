@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <memory>
 
 #define MYCILA_HA_VERSION          "6.0.1"
 #define MYCILA_HA_VERSION_MAJOR    6
@@ -106,10 +107,10 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/select.mqtt/
     class Select : public Component {
       public:
-        Select(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* icon = nullptr, const Category category = Category::NONE, const std::vector<const char*>& options = {}) : Component("select", id, name, nullptr, icon, category) {
+        Select(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* icon = nullptr, const Category category = Category::NONE, std::vector<const char*> options = {}) : Component("select", id, name, nullptr, icon, category) {
           this->commandTopic = commandTopic;
           this->stateTopic = stateTopic;
-          this->options = options;
+          this->options = std::move(options);
         }
     };
 
@@ -211,7 +212,7 @@ namespace Mycila {
         void begin(Device device, std::string baseTopic, const PublisherCallback publisher) { begin(device, baseTopic, 1024, publisher); }
         void begin(Device device, std::string baseTopic, const size_t bufferSise, const PublisherCallback publisher);
 
-        void publish(const Component& component);
+        void publish(std::unique_ptr<Component> component);
 
         // called after all components are published
         // will clear the buffers
