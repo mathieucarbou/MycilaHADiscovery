@@ -198,22 +198,18 @@ namespace Mycila {
     class Discovery {
       public:
         // OPTIONAL: HA discovery topic, default to MYCILA_HA_DISCOVERY_TOPIC
-        void setDiscoveryTopic(const char* discoveryTopic) { _discoveryTopic = discoveryTopic; };
-        void setDiscoveryTopic(const std::string& discoveryTopic) { _discoveryTopic = discoveryTopic; };
-        void setDiscoveryTopic(std::string&& discoveryTopic) { _discoveryTopic = std::move(discoveryTopic); };
+        void setDiscoveryTopic(std::string discoveryTopic) { _discoveryTopic = std::move(discoveryTopic); };
 
         // OPTIONAL: set will topic (absolute), default to empty string, which is disabled
-        void setWillTopic(const char* willTopic) { _willTopic = willTopic; };
-        void setWillTopic(const std::string& willTopic) { _willTopic = willTopic; };
-        void setWillTopic(std::string&& willTopic) { _willTopic = std::move(willTopic); };
+        void setWillTopic(std::string willTopic) { _willTopic = std::move(willTopic); };
 
         // OPTIONAL: sensor expiration time in seconds, 0 for no expiration, default to MYCILA_HA_SENSOR_EXPIRATION_TIME
         void setSensorExpirationTime(const uint32_t sensorExpirationTime) { _sensorExpirationTime = sensorExpirationTime; };
 
         // called each time before publishing components
         // will prepare the buffers
-        void begin(const Device& device, const char* baseTopic, const PublisherCallback publisher) { begin(device, baseTopic, 1024, publisher); }
-        void begin(const Device& device, const char* baseTopic, const size_t bufferSise, const PublisherCallback publisher);
+        void begin(Device device, std::string baseTopic, const PublisherCallback publisher) { begin(device, baseTopic, 1024, publisher); }
+        void begin(Device device, std::string baseTopic, const size_t bufferSise, const PublisherCallback publisher);
 
         void publish(const Component& component);
 

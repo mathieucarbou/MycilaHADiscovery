@@ -25,9 +25,9 @@ extern Mycila::Logger logger;
 
 #define TAG "HA"
 
-void Mycila::HA::Discovery::begin(const Device& device, const char* baseTopic, const size_t bufferSise, const PublisherCallback publisher) {
-  _device = device;
-  _baseTopic = baseTopic;
+void Mycila::HA::Discovery::begin(Device device, std::string baseTopic, const size_t bufferSise, const PublisherCallback publisher) {
+  _device = std::move(device);
+  _baseTopic = std::move(baseTopic);
   _publisher = publisher;
 
   // cache device
