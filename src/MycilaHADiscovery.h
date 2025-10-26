@@ -10,10 +10,10 @@
 #include <vector>
 #include <memory>
 
-#define MYCILA_HA_VERSION          "6.2.0"
+#define MYCILA_HA_VERSION          "6.2.1"
 #define MYCILA_HA_VERSION_MAJOR    6
 #define MYCILA_HA_VERSION_MINOR    2
-#define MYCILA_HA_VERSION_REVISION 0
+#define MYCILA_HA_VERSION_REVISION 1
 
 #ifndef MYCILA_HA_DISCOVERY_TOPIC
   #define MYCILA_HA_DISCOVERY_TOPIC "homeassistant"
