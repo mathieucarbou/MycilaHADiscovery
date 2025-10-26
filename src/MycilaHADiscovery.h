@@ -222,8 +222,6 @@ namespace Mycila {
         Device _device;
         PublisherCallback _publisher = nullptr;
         std::string _baseTopic;
-        std::string _buffer;
-        std::string _deviceJsonCache;
         std::string _discoveryTopic = MYCILA_HA_DISCOVERY_TOPIC;
         std::string _willTopic;
         uint32_t _sensorExpirationTime = MYCILA_HA_SENSOR_EXPIRATION_TIME;

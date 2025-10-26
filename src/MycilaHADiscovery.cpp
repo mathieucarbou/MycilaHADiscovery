@@ -30,21 +30,6 @@ void Mycila::HA::Discovery::begin(Device device, std::string baseTopic, const si
   _device = std::move(device);
   _baseTopic = std::move(baseTopic);
   _publisher = publisher;
-
-  // cache device
-  JsonDocument doc;
-  JsonObject json = doc.to<JsonObject>();
-  json["name"] = _device.name.c_str();
-  json["ids"] = _device.id.c_str();
-  json["mf"] = _device.manufacturer.c_str();
-  json["mdl"] = _device.model.c_str();
-  json["sw"] = _device.version.c_str();
-  json["cu"] = _device.url.c_str();
-  _deviceJsonCache.reserve(measureJson(json));
-  serializeJson(json, _deviceJsonCache);
-
-  // prepare buffer
-  _buffer.reserve(bufferSise);
 }
 
 void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
@@ -65,6 +50,15 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
 #else
   JsonDocument root;
 #endif
+
+  // device
+  JsonObject device = root["dev"].to<JsonObject>();
+  device["ids"] = _device.id.c_str();
+  device["name"] = _device.name.c_str();
+  device["mf"] = _device.manufacturer.c_str();
+  device["mdl"] = _device.model.c_str();
+  device["sw"] = _device.version.c_str();
+  device["cu"] = _device.url.c_str();
 
   root["name"] = component->name;
   root["uniq_id"] = _device.id + "_" + component->id;
@@ -154,12 +148,8 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
       opts.add(opt);
   }
 
-  _buffer.clear();
-  serializeJson(root, _buffer);
-  _buffer[_buffer.length() - 1] = ',';
-  _buffer.append("\"dev\":");
-  _buffer.append(_deviceJsonCache);
-  _buffer.append("}");
+  std::string buffer;
+  buffer.reserve(measureJson(root));
 
   std::string topic;
   topic.reserve(_discoveryTopic.length() + 1 + strlen(component->type) + 1 + _device.id.length() + 1 + strlen(component->id) + 7);
@@ -172,12 +162,10 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   topic.append(component->id);
   topic.append("/config");
 
-  LOGD(TAG, "%s [%d b]", topic.c_str(), _buffer.length());
-  _publisher(topic.c_str(), _buffer);
+  LOGD(TAG, "%s [%d b]", topic.c_str(), buffer.length());
+  _publisher(topic.c_str(), buffer);
 }
 
 void Mycila::HA::Discovery::end() {
-  _deviceJsonCache = {};
-  _buffer = {};
   _publisher = nullptr;
 }
