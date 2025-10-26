@@ -62,7 +62,6 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
 
   root["name"] = component->name;
   root["uniq_id"] = _device.id + "_" + component->id;
-  root["obj_id"] = _device.id + "_" + component->id;
 
   if (!component->availabilityTopic) {
     if (!_willTopic.empty()) {
@@ -150,6 +149,7 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
 
   std::string buffer;
   buffer.reserve(measureJson(root));
+  serializeJson(root, buffer);
 
   std::string topic;
   topic.reserve(_discoveryTopic.length() + 1 + strlen(component->type) + 1 + _device.id.length() + 1 + strlen(component->id) + 7);
