@@ -16,7 +16,7 @@
 #define MYCILA_HA_VERSION_REVISION 0
 
 #ifndef MYCILA_HA_DISCOVERY_TOPIC
-  #define MYCILA_HA_DISCOVERY_TOPIC "homeassistant/discovery"
+  #define MYCILA_HA_DISCOVERY_TOPIC "homeassistant"
 #endif
 
 #ifndef MYCILA_HA_SENSOR_EXPIRATION_TIME
