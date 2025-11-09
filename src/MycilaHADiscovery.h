@@ -214,6 +214,8 @@ namespace Mycila {
 
         void publish(std::unique_ptr<Component> component);
 
+        void unpublish(std::unique_ptr<Component> component);
+
         // called after all components are published
         // will clear the buffers
         void end();

@@ -45,11 +45,7 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   if (_device.id.empty())
     return;
 
-#if ARDUINOJSON_VERSION_MAJOR == 6
-  DynamicJsonDocument root(1024);
-#else
   JsonDocument root;
-#endif
 
   // device
   JsonObject device = root["dev"].to<JsonObject>();
@@ -69,22 +65,16 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
     }
   } else {
     root["avty_mode"] = "all";
+
     JsonArray array = root["availability"].to<JsonArray>();
     if (!_willTopic.empty()) {
-#if ARDUINOJSON_VERSION_MAJOR == 6
-      JsonObject deviceAvail = array.createNestedObject();
-#else
       JsonObject deviceAvail = array.add<JsonObject>();
-#endif
       deviceAvail["topic"] = _willTopic.c_str();
       deviceAvail["pl_avail"] = "online";
       deviceAvail["pl_not_avail"] = "offline";
     }
-#if ARDUINOJSON_VERSION_MAJOR == 6
-    JsonObject compAvail = array.createNestedObject();
-#else
+
     JsonObject compAvail = array.add<JsonObject>();
-#endif
     compAvail["topic"] = _baseTopic + component->availabilityTopic;
     if (component->payloadAvailable)
       compAvail["pl_avail"] = component->payloadAvailable;
@@ -164,6 +154,34 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
 
   LOGD(TAG, "%s [%d b]", topic.c_str(), buffer.length());
   _publisher(topic.c_str(), buffer);
+}
+
+void Mycila::HA::Discovery::unpublish(std::unique_ptr<Component> component) {
+  if (_discoveryTopic.empty())
+    return;
+
+  if (_baseTopic.empty())
+    return;
+
+  if (!_publisher)
+    return;
+
+  if (_device.id.empty())
+    return;
+
+  std::string topic;
+  topic.reserve(_discoveryTopic.length() + 1 + strlen(component->type) + 1 + _device.id.length() + 1 + strlen(component->id) + 7);
+  topic.append(_discoveryTopic);
+  topic.append("/");
+  topic.append(component->type);
+  topic.append("/");
+  topic.append(_device.id);
+  topic.append("/");
+  topic.append(component->id);
+  topic.append("/config");
+
+  LOGD(TAG, "unpublish: %s", topic.c_str());
+  _publisher(topic.c_str(), "");
 }
 
 void Mycila::HA::Discovery::end() {
