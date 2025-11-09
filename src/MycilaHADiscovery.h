@@ -4,11 +4,13 @@
  */
 #pragma once
 
+#include <ArduinoJson.h>
+
 #include <functional>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-#include <memory>
 
 #define MYCILA_HA_VERSION          "6.3.0"
 #define MYCILA_HA_VERSION_MAJOR    6
@@ -50,6 +52,39 @@ namespace Mycila {
     class Component {
       public:
         Component(const char* type, const char* id, const char* name, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : type(type), id(id), name(name), deviceClass(deviceClass), icon(icon), category(category) {}
+        virtual ~Component() = default;
+
+        virtual void toJson(const JsonObject& root) {
+          root["name"] = name;
+          if (deviceClass)
+            root["dev_cla"] = deviceClass;
+          if (icon)
+            root["ic"] = icon;
+          if (category == Category::CONFIG)
+            root["ent_cat"] = "config";
+          if (category == Category::DIAGNOSTIC)
+            root["ent_cat"] = "diagnostic";
+          if (stateClass == StateClass::COUNTER)
+            root["stat_cla"] = "total_increasing";
+          if (stateClass == StateClass::GAUGE)
+            root["stat_cla"] = "measurement";
+          if (stateClass == StateClass::TOTAL)
+            root["stat_cla"] = "total";
+          if (unit)
+            root["unit_of_meas"] = unit;
+          if (commandTopic)
+            root["cmd_t"] = commandTopic;
+          if (stateTopic)
+            root["stat_t"] = stateTopic;
+          if (valueTemplate)
+            root["val_tpl"] = valueTemplate;
+          if (payloadOn)
+            root["pl_on"] = payloadOn;
+          if (payloadOff)
+            root["pl_off"] = payloadOff;
+          if (pattern)
+            root["ptrn"] = pattern;
+        }
 
       public:
         const char* type;
@@ -69,17 +104,13 @@ namespace Mycila {
         const char* payloadNotAvailable = nullptr;
         const char* payloadOn = nullptr;
         const char* payloadOff = nullptr;
-        std::vector<const char*> options;
-        NumberMode mode = NumberMode::AUTO;
-        float min = 0;
-        float max = 100;
-        float step = 1;
     };
 
     // https://www.home-assistant.io/integrations/button.mqtt/
     class Button : public Component {
       public:
         Button(const char* id, const char* name, const char* commandTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : Component("button", id, name, deviceClass, icon, category) { this->commandTopic = commandTopic; }
+        virtual ~Button() = default;
     };
 
     // https://www.home-assistant.io/integrations/switch.mqtt/ (switch)
@@ -91,6 +122,7 @@ namespace Mycila {
           this->payloadOn = payloadOn;
           this->payloadOff = payloadOff;
         }
+        virtual ~Switch() = default;
     };
 
     // https://www.home-assistant.io/integrations/switch.mqtt/ (outlet)
@@ -102,6 +134,7 @@ namespace Mycila {
           this->payloadOn = payloadOn;
           this->payloadOff = payloadOff;
         }
+        virtual ~Outlet() = default;
     };
 
     // https://www.home-assistant.io/integrations/select.mqtt/
@@ -112,6 +145,16 @@ namespace Mycila {
           this->stateTopic = stateTopic;
           this->options = std::move(options);
         }
+        virtual ~Select() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          JsonArray opts = root["options"].to<JsonArray>();
+          for (auto& opt : options)
+            opts.add(opt);
+        }
+
+        std::vector<const char*> options;
     };
 
     // https://www.home-assistant.io/integrations/text.mqtt/
@@ -122,6 +165,7 @@ namespace Mycila {
           this->stateTopic = stateTopic;
           this->pattern = pattern;
         }
+        virtual ~Text() = default;
     };
 
     // https://www.home-assistant.io/integrations/number.mqtt/
@@ -135,6 +179,20 @@ namespace Mycila {
           this->max = max;
           this->step = step;
         }
+        virtual ~Number() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          root["mode"] = mode == NumberMode::BOX ? "box" : (mode == NumberMode::SLIDER ? "slider" : "auto");
+          root["min"] = min;
+          root["max"] = max;
+          root["step"] = step;
+        }
+
+        NumberMode mode = NumberMode::AUTO;
+        float min = 0;
+        float max = 100;
+        float step = 1;
     };
 
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
@@ -146,6 +204,7 @@ namespace Mycila {
           this->payloadOn = payloadOn;
           this->payloadOff = payloadOff;
         }
+        virtual ~State() = default;
     };
 
     // https://www.home-assistant.io/integrations/sensor.mqtt/
@@ -157,6 +216,7 @@ namespace Mycila {
           this->stateTopic = stateTopic;
           this->stateClass = stateClass;
         }
+        virtual ~Sensor() = default;
     };
 
     // https://www.home-assistant.io/integrations/sensor.mqtt/ (measurement)
@@ -166,6 +226,7 @@ namespace Mycila {
             : Sensor(id, name, stateTopic, StateClass::GAUGE, deviceClass, icon, unit, category) {
           this->valueTemplate = valueTemplate;
         }
+        virtual ~Gauge() = default;
     };
 
     // https://www.home-assistant.io/integrations/sensor.mqtt/ (total_increasing)
@@ -175,6 +236,7 @@ namespace Mycila {
             : Sensor(id, name, stateTopic, StateClass::COUNTER, deviceClass, icon, unit, category) {
           this->valueTemplate = valueTemplate;
         }
+        virtual ~Counter() = default;
     };
 
     // https://www.home-assistant.io/integrations/sensor.mqtt/ (total)
@@ -182,6 +244,7 @@ namespace Mycila {
       public:
         Total(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE)
             : Sensor(id, name, stateTopic, StateClass::TOTAL, deviceClass, icon, unit, category) {}
+        virtual ~Total() = default;
     };
 
     // https://www.home-assistant.io/integrations/sensor.mqtt/ (no state class)
@@ -191,6 +254,30 @@ namespace Mycila {
             : Sensor(id, name, stateTopic, StateClass::NONE, deviceClass, icon, nullptr, category) {
           this->valueTemplate = valueTemplate;
         }
+        virtual ~Value() = default;
+    };
+
+    // https://www.home-assistant.io/integrations/update.mqtt/ (no state class)
+    class Update : public Component {
+      public:
+        Update(const char* id, const char* name, const char* url = nullptr, const char* stateTopic = nullptr, const char* latestVersionTopic = nullptr, const char* deviceClass = "firmware", const char* icon = nullptr, const Category category = Category::NONE)
+            : Component("update", id, name, deviceClass, icon, category) {
+          this->stateTopic = stateTopic;
+          this->url = url;
+          this->latestVersionTopic = latestVersionTopic;
+        }
+        virtual ~Update() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (url)
+            root["rel_u"] = url;
+          if (latestVersionTopic)
+            root["l_ver_t"] = latestVersionTopic;
+        }
+
+        const char* url = nullptr;
+        const char* latestVersionTopic = nullptr;
     };
 
     typedef std::function<void(const char* topic, const std::string& payload)> PublisherCallback;

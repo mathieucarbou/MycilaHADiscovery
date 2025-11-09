@@ -4,8 +4,6 @@
  */
 #include <MycilaHADiscovery.h>
 
-#include <ArduinoJson.h>
-
 #include <functional>
 #include <string>
 #include <utility>
@@ -45,7 +43,14 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   if (_device.id.empty())
     return;
 
-  JsonDocument root;
+  JsonDocument doc;
+  JsonObject root = doc.to<JsonObject>();
+
+  // base topic
+  root["~"] = _baseTopic.c_str();
+
+  // unique id
+  root["uniq_id"] = _device.id + "_" + component->id;
 
   // device
   JsonObject device = root["dev"].to<JsonObject>();
@@ -56,9 +61,7 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   device["sw"] = _device.version.c_str();
   device["cu"] = _device.url.c_str();
 
-  root["name"] = component->name;
-  root["uniq_id"] = _device.id + "_" + component->id;
-
+  // availability
   if (!component->availabilityTopic) {
     if (!_willTopic.empty()) {
       root["avty_t"] = _willTopic.c_str();
@@ -75,67 +78,18 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
     }
 
     JsonObject compAvail = array.add<JsonObject>();
-    compAvail["topic"] = _baseTopic + component->availabilityTopic;
+    compAvail["topic"] = component->availabilityTopic;
     if (component->payloadAvailable)
       compAvail["pl_avail"] = component->payloadAvailable;
     if (component->payloadNotAvailable)
       compAvail["pl_not_avail"] = component->payloadNotAvailable;
   }
 
-  if (component->deviceClass)
-    root["dev_cla"] = component->deviceClass;
-
-  if (component->icon)
-    root["ic"] = component->icon;
-
-  if (component->category == Category::CONFIG)
-    root["ent_cat"] = "config";
-  if (component->category == Category::DIAGNOSTIC)
-    root["ent_cat"] = "diagnostic";
-
-  if (component->stateClass == StateClass::COUNTER)
-    root["stat_cla"] = "total_increasing";
-  if (component->stateClass == StateClass::GAUGE)
-    root["stat_cla"] = "measurement";
-  if (component->stateClass == StateClass::TOTAL)
-    root["stat_cla"] = "total";
-
-  if (component->unit)
-    root["unit_of_meas"] = component->unit;
-
-  if (component->commandTopic)
-    root["cmd_t"] = _baseTopic + component->commandTopic;
-
-  if (component->stateTopic)
-    root["stat_t"] = _baseTopic + component->stateTopic;
-
-  if (component->valueTemplate)
-    root["val_tpl"] = component->valueTemplate;
-
-  if (component->payloadOn)
-    root["pl_on"] = component->payloadOn;
-
-  if (component->payloadOff)
-    root["pl_off"] = component->payloadOff;
-
-  if (component->pattern)
-    root["ptrn"] = component->pattern;
-
-  if (strcmp(component->type, "number") == 0) {
-    root["mode"] = component->mode == NumberMode::BOX ? "box" : (component->mode == NumberMode::SLIDER ? "slider" : "auto");
-    root["min"] = component->min;
-    root["max"] = component->max;
-    root["step"] = component->step;
-  }
+  // component
+  component->toJson(root);
 
   if (_sensorExpirationTime > 0 && strcmp(component->type, "sensor") == 0)
     root["exp_aft"] = _sensorExpirationTime;
-
-  if (component->options.size() > 0) {
-    JsonArray opts = root["options"].to<JsonArray>();
-    for (auto& opt : component->options)
-      opts.add(opt);
-  }
 
   std::string buffer;
   buffer.reserve(measureJson(root));
