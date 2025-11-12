@@ -24,10 +24,10 @@ extern Mycila::Logger logger;
 
 #define TAG "HA"
 
-void Mycila::HA::Discovery::begin(Device device, std::string baseTopic, const size_t bufferSise, const PublisherCallback publisher) {
+void Mycila::HA::Discovery::begin(Device device, std::string baseTopic, const size_t bufferSise, PublisherCallback publisher) {
   _device = std::move(device);
   _baseTopic = std::move(baseTopic);
-  _publisher = publisher;
+  _publisher = std::move(publisher);
 }
 
 void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {

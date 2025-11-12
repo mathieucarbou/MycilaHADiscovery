@@ -296,8 +296,8 @@ namespace Mycila {
 
         // called each time before publishing components
         // will prepare the buffers
-        void begin(Device device, std::string baseTopic, const PublisherCallback publisher) { begin(device, baseTopic, 1024, publisher); }
-        void begin(Device device, std::string baseTopic, const size_t bufferSise, const PublisherCallback publisher);
+        void begin(Device device, std::string baseTopic, PublisherCallback publisher) { begin(device, baseTopic, 1024, std::move(publisher)); }
+        void begin(Device device, std::string baseTopic, const size_t bufferSise, PublisherCallback publisher);
 
         void publish(std::unique_ptr<Component> component);
 
