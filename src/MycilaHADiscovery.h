@@ -12,10 +12,10 @@
 #include <utility>
 #include <vector>
 
-#define MYCILA_HA_VERSION          "7.0.1"
+#define MYCILA_HA_VERSION          "7.1.0"
 #define MYCILA_HA_VERSION_MAJOR    7
-#define MYCILA_HA_VERSION_MINOR    0
-#define MYCILA_HA_VERSION_REVISION 1
+#define MYCILA_HA_VERSION_MINOR    1
+#define MYCILA_HA_VERSION_REVISION 0
 
 #ifndef MYCILA_HA_DISCOVERY_TOPIC
   #define MYCILA_HA_DISCOVERY_TOPIC "homeassistant"
@@ -299,9 +299,30 @@ namespace Mycila {
         void begin(Device device, std::string baseTopic, PublisherCallback publisher) { begin(device, baseTopic, 1024, std::move(publisher)); }
         void begin(Device device, std::string baseTopic, const size_t bufferSise, PublisherCallback publisher);
 
+        // Publish a component, transferring ownership.
+        // The component is allocated on the heap, serialized, then automatically freed.
         void publish(std::unique_ptr<Component> component);
 
+        // Unpublish (remove) a component, transferring ownership.
+        // The component is allocated on the heap, its discovery topic is cleared, then automatically freed.
         void unpublish(std::unique_ptr<Component> component);
+
+        // Convenience overload: construct the component in-place on the heap.
+        // Equivalent to publish(std::make_unique<T>(args...)).
+        //
+        // Example:
+        //   haDiscovery.publish<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart", nullptr, Mycila::HA::Category::DIAGNOSTIC);
+        template<typename T, typename... Args>
+        void publish(Args&&... args) {
+          publish(std::make_unique<T>(std::forward<Args>(args)...));
+        }
+
+        // Convenience overload: construct the component in-place on the heap.
+        // Equivalent to unpublish(std::make_unique<T>(args...)).
+        template<typename T, typename... Args>
+        void unpublish(Args&&... args) {
+          unpublish(std::make_unique<T>(std::forward<Args>(args)...));
+        }
 
         // called after all components are published
         // will clear the buffers
