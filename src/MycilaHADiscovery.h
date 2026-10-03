@@ -257,6 +257,26 @@ namespace Mycila {
         virtual ~Value() = default;
     };
 
+    // https://www.home-assistant.io/integrations/sensor.mqtt/ (enum: closed set of possible values)
+    class Enum : public Sensor {
+      public:
+        Enum(const char* id, const char* name, const char* stateTopic, std::vector<const char*> options, const char* icon = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
+            : Sensor(id, name, stateTopic, StateClass::NONE, "enum", icon, nullptr, category) {
+          this->valueTemplate = valueTemplate;
+          this->options = std::move(options);
+        }
+        virtual ~Enum() = default;
+
+        void toJson(const JsonObject& root) override {
+          Sensor::toJson(root);
+          JsonArray opts = root["options"].to<JsonArray>();
+          for (auto& opt : options)
+            opts.add(opt);
+        }
+
+        std::vector<const char*> options;
+    };
+
     // https://www.home-assistant.io/integrations/update.mqtt/ (no state class)
     class Update : public Component {
       public:
