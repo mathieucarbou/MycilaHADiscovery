@@ -12,9 +12,9 @@
 #include <utility>
 #include <vector>
 
-#define MYCILA_HA_VERSION          "7.1.0"
+#define MYCILA_HA_VERSION          "7.2.0"
 #define MYCILA_HA_VERSION_MAJOR    7
-#define MYCILA_HA_VERSION_MINOR    1
+#define MYCILA_HA_VERSION_MINOR    2
 #define MYCILA_HA_VERSION_REVISION 0
 
 #ifndef MYCILA_HA_DISCOVERY_TOPIC
