@@ -15,6 +15,7 @@ Simple and efficient Home Assistant Discovery library for Arduino / ESP32
   - select
   - slider / box with min, max, step
   - input (number and text)
+  - climate (with temperature, mode, action and preset topics)
 - Sensors:
   - text
   - binary (state)
@@ -23,6 +24,7 @@ Simple and efficient Home Assistant Discovery library for Arduino / ESP32
 - Supports regex validation
 - Supports availability (global and per component)
 - Supports device class, icon, state class, unit of measurement
+- Supports optional entity IDs, enabled-by-default settings and sensor expiration
 
 ## Basic Usage
 
@@ -93,5 +95,21 @@ Then query state:
    haDiscovery.publish<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart");
    haDiscovery.publish<Mycila::HA::Gauge>("temperature", "Temperature", "~/sensor/temp", "temperature", nullptr, "°C");
    ```
+
+The [dynamic entities example](examples/DynamicEntities/DynamicEntities.ino) creates components from generated IDs, names and topics, renames an entity while preserving its identity, and removes it. Its factory returns each component before publication: the component owns its strings, so the caller does not need to keep separate backing buffers alive. Constructors accept strings by value and move them into the component. Templates, payloads and constant metadata remain borrowed.
+
+The example prints discovery topics and payloads to Serial. To use it with Home Assistant, replace the publisher callback with your MQTT transport and publish discovery messages with the retain flag set. Sensor readings are published separately on each sensor's state topic.
+
+The previous `const char*` constructor signatures remain available as deprecated overloads. They convert `nullptr` in owned string arguments to empty strings and delegate to the owning constructors, so existing nullable calls continue to work:
+
+```c++
+  // Legacy constructor (deprecated).
+  haDiscovery.unpublish<Mycila::HA::Value>("firmware_filename", nullptr, nullptr);
+
+  // Current API: removal only needs the identity.
+  haDiscovery.unpublish<Mycila::HA::Value>("firmware_filename", "");
+```
+
+Full constructor calls with string literals also select the deprecated overloads. Pass `std::string` arguments to select the owning overloads explicitly. The new API uses empty strings for omitted values, including calls that mix `std::string` and string literals; use `clear()` or an empty string instead of assigning `nullptr` to an owned field.
 
 Usage example in YaSolR: https://github.com/mathieucarbou/YaSolR/blob/main/src/yasolr_mqtt.cpp

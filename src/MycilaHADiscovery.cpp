@@ -50,7 +50,12 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   root["~"] = _baseTopic.c_str();
 
   // unique id
-  root["uniq_id"] = _device.id + "_" + component->id;
+  if (component->uniqueId.empty())
+    component->uniqueId = _device.id + "_" + component->id;
+  root["uniq_id"] = component->uniqueId;
+
+  if (component->defaultEntityId.empty())
+    component->defaultEntityId = std::string(component->type) + "." + component->uniqueId;
 
   // device
   JsonObject device = root["dev"].to<JsonObject>();
@@ -62,15 +67,15 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   device["cu"] = _device.url.c_str();
 
   // availability
-  if (!component->availabilityTopic) {
-    if (!_willTopic.empty()) {
+  if (component->availabilityTopic.empty()) {
+    if (component->useDeviceAvailability && !_willTopic.empty()) {
       root["avty_t"] = _willTopic.c_str();
     }
   } else {
     root["avty_mode"] = "all";
 
     JsonArray array = root["availability"].to<JsonArray>();
-    if (!_willTopic.empty()) {
+    if (component->useDeviceAvailability && !_willTopic.empty()) {
       JsonObject deviceAvail = array.add<JsonObject>();
       deviceAvail["topic"] = _willTopic.c_str();
       deviceAvail["pl_avail"] = "online";
@@ -79,6 +84,8 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
 
     JsonObject compAvail = array.add<JsonObject>();
     compAvail["topic"] = component->availabilityTopic;
+    if (component->availabilityTemplate)
+      compAvail["val_tpl"] = component->availabilityTemplate;
     if (component->payloadAvailable)
       compAvail["pl_avail"] = component->payloadAvailable;
     if (component->payloadNotAvailable)
@@ -88,23 +95,39 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   // component
   component->toJson(root);
 
-  if (_sensorExpirationTime > 0 && strcmp(component->type, "sensor") == 0)
-    root["exp_aft"] = _sensorExpirationTime;
+  const bool sensor = strcmp(component->type, "sensor") == 0;
+  if (sensor || strcmp(component->type, "binary_sensor") == 0) {
+    const uint32_t expirationTime = component->expireAfter.value_or(sensor ? _sensorExpirationTime : 0);
+    if (expirationTime > 0) {
+      root["exp_aft"] = expirationTime;
+    } else if (component->expireAfter.has_value()) {
+      root.remove("exp_aft");
+    }
+  }
+
+  if (doc.overflowed()) {
+    LOGW(TAG, "Not enough memory for discovery config");
+    return;
+  }
 
   std::string buffer;
   buffer.reserve(measureJson(root));
   serializeJson(root, buffer);
 
   std::string topic;
-  topic.reserve(_discoveryTopic.length() + 1 + strlen(component->type) + 1 + _device.id.length() + 1 + strlen(component->id) + 7);
-  topic.append(_discoveryTopic);
-  topic.append("/");
-  topic.append(component->type);
-  topic.append("/");
-  topic.append(_device.id);
-  topic.append("/");
-  topic.append(component->id);
-  topic.append("/config");
+  if (!component->configTopic.empty()) {
+    topic = component->configTopic;
+  } else {
+    topic.reserve(_discoveryTopic.length() + 1 + strlen(component->type) + 1 + _device.id.length() + 1 + component->id.length() + 7);
+    topic.append(_discoveryTopic);
+    topic.append("/");
+    topic.append(component->type);
+    topic.append("/");
+    topic.append(_device.id);
+    topic.append("/");
+    topic.append(component->id);
+    topic.append("/config");
+  }
 
   LOGD(TAG, "%s [%d b]", topic.c_str(), buffer.length());
   _publisher(topic.c_str(), buffer);
@@ -124,15 +147,19 @@ void Mycila::HA::Discovery::unpublish(std::unique_ptr<Component> component) {
     return;
 
   std::string topic;
-  topic.reserve(_discoveryTopic.length() + 1 + strlen(component->type) + 1 + _device.id.length() + 1 + strlen(component->id) + 7);
-  topic.append(_discoveryTopic);
-  topic.append("/");
-  topic.append(component->type);
-  topic.append("/");
-  topic.append(_device.id);
-  topic.append("/");
-  topic.append(component->id);
-  topic.append("/config");
+  if (!component->configTopic.empty()) {
+    topic = component->configTopic;
+  } else {
+    topic.reserve(_discoveryTopic.length() + 1 + strlen(component->type) + 1 + _device.id.length() + 1 + component->id.length() + 7);
+    topic.append(_discoveryTopic);
+    topic.append("/");
+    topic.append(component->type);
+    topic.append("/");
+    topic.append(_device.id);
+    topic.append("/");
+    topic.append(component->id);
+    topic.append("/config");
+  }
 
   LOGD(TAG, "unpublish: %s", topic.c_str());
   _publisher(topic.c_str(), "");

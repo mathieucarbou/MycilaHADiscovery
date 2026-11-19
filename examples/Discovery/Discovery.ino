@@ -47,6 +47,24 @@ void setup() {
   relay1Commute->payloadAvailable = "true";
   relay1Commute->payloadNotAvailable = "false";
   haDiscovery.publish(std::move(relay1Commute));
+
+  // climate with temperature, operating mode, action and a boost preset
+  auto climate = std::make_unique<Mycila::HA::Climate>("thermostat", "Thermostat", "mdi:radiator");
+  climate->currentTemperatureTopic = "~/thermostat/current_temperature";
+  climate->temperatureCommandTopic = "~/thermostat/target_temperature/set";
+  climate->temperatureStateTopic = "~/thermostat/target_temperature";
+  climate->modeCommandTopic = "~/thermostat/mode/set";
+  climate->modeStateTopic = "~/thermostat/mode";
+  climate->modes = {"off", "heat"};
+  climate->actionTopic = "~/thermostat/action";
+  climate->presetModeCommandTopic = "~/thermostat/preset/set";
+  climate->presetModeStateTopic = "~/thermostat/preset";
+  climate->presetModes = {"boost"};
+  climate->temperatureUnit = "C";
+  climate->minTemp = 5;
+  climate->maxTemp = 30;
+  climate->tempStep = 0.1f;
+  haDiscovery.publish(std::move(climate));
 }
 
 void loop() {
