@@ -106,7 +106,7 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   }
 
   if (doc.overflowed()) {
-    LOGW(TAG, "Not enough memory for discovery config");
+    LOGE(TAG, "Not enough memory for discovery config");
     return;
   }
 
