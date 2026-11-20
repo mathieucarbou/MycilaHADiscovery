@@ -779,6 +779,93 @@ namespace Mycila {
         const char* stateClosing = nullptr; // default closing
     };
 
+    // https://www.home-assistant.io/integrations/humidifier.mqtt/
+    class Humidifier : public Component {
+      public:
+        Humidifier(std::string id, std::string name, std::string commandTopic, std::string targetHumidityCommandTopic, const char* deviceClass = "humidifier", const char* icon = nullptr, const Category category = Category::NONE) : Component("humidifier", std::move(id), std::move(name), deviceClass, icon, category) {
+          this->commandTopic = std::move(commandTopic);
+          this->targetHumidityCommandTopic = std::move(targetHumidityCommandTopic);
+        }
+        virtual ~Humidifier() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (stateValueTemplate)
+            root["stat_val_tpl"] = stateValueTemplate;
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (commandTemplate)
+            root["cmd_tpl"] = commandTemplate;
+          if (payloadOn)
+            root["pl_on"] = payloadOn;
+          if (payloadOff)
+            root["pl_off"] = payloadOff;
+          if (!currentHumidityTopic.empty())
+            root["curr_hum_t"] = currentHumidityTopic;
+          if (currentHumidityTemplate)
+            root["curr_hum_tpl"] = currentHumidityTemplate;
+          if (!targetHumidityCommandTopic.empty())
+            root["hum_cmd_t"] = targetHumidityCommandTopic;
+          if (targetHumidityCommandTemplate)
+            root["hum_cmd_tpl"] = targetHumidityCommandTemplate;
+          if (!targetHumidityStateTopic.empty())
+            root["hum_stat_t"] = targetHumidityStateTopic;
+          if (targetHumidityStateTemplate)
+            root["hum_state_tpl"] = targetHumidityStateTemplate;
+          if (payloadResetHumidity)
+            root["pl_rst_hum"] = payloadResetHumidity;
+          if (minHumidity.has_value())
+            root["min_hum"] = minHumidity.value();
+          if (maxHumidity.has_value())
+            root["max_hum"] = maxHumidity.value();
+          if (!modeCommandTopic.empty())
+            root["mode_cmd_t"] = modeCommandTopic;
+          if (modeCommandTemplate)
+            root["mode_cmd_tpl"] = modeCommandTemplate;
+          if (!modeStateTopic.empty())
+            root["mode_stat_t"] = modeStateTopic;
+          if (modeStateTemplate)
+            root["mode_stat_tpl"] = modeStateTemplate;
+          if (payloadResetMode)
+            root["pl_rst_mode"] = payloadResetMode;
+          if (!modes.empty()) {
+            JsonArray opts = root["modes"].to<JsonArray>();
+            for (auto& opt : modes)
+              opts.add(opt);
+          }
+          if (!actionTopic.empty())
+            root["act_t"] = actionTopic;
+          if (actionTemplate)
+            root["act_tpl"] = actionTemplate;
+        }
+
+        std::string stateTopic; // reports on/off
+        const char* stateValueTemplate = nullptr;
+        std::string commandTopic; // required: on/off commands
+        const char* commandTemplate = nullptr;
+        const char* payloadOn = nullptr; // default ON
+        const char* payloadOff = nullptr; // default OFF
+        std::string currentHumidityTopic;
+        const char* currentHumidityTemplate = nullptr;
+        std::string targetHumidityCommandTopic; // required: humidity 0-100 commands
+        const char* targetHumidityCommandTemplate = nullptr;
+        std::string targetHumidityStateTopic;
+        const char* targetHumidityStateTemplate = nullptr;
+        const char* payloadResetHumidity = nullptr; // default None
+        std::optional<float> minHumidity; // default 0
+        std::optional<float> maxHumidity; // default 100
+        std::string modeCommandTopic; // normal/boost/eco/etc., set together with modes
+        const char* modeCommandTemplate = nullptr;
+        std::string modeStateTopic;
+        const char* modeStateTemplate = nullptr;
+        const char* payloadResetMode = nullptr; // default None
+        std::vector<const char*> modes;
+        std::string actionTopic; // humidifying/drying/idle/off
+        const char* actionTemplate = nullptr;
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
