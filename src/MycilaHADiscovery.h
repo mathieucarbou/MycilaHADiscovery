@@ -866,6 +866,62 @@ namespace Mycila {
         const char* actionTemplate = nullptr;
     };
 
+    // https://www.home-assistant.io/integrations/lock.mqtt/
+    class Lock : public Component {
+      public:
+        Lock(std::string id, std::string name, std::string commandTopic, const char* icon = nullptr, const Category category = Category::NONE) : Component("lock", std::move(id), std::move(name), nullptr, icon, category) {
+          this->commandTopic = std::move(commandTopic);
+        }
+        virtual ~Lock() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (valueTemplate)
+            root["val_tpl"] = valueTemplate;
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (commandTemplate)
+            root["cmd_tpl"] = commandTemplate;
+          if (codeFormat)
+            root["cod_form"] = codeFormat;
+          if (payloadLock)
+            root["pl_lock"] = payloadLock;
+          if (payloadUnlock)
+            root["pl_unlk"] = payloadUnlock;
+          if (payloadOpen)
+            root["pl_open"] = payloadOpen;
+          if (payloadReset)
+            root["pl_rst"] = payloadReset;
+          if (stateLocked)
+            root["stat_locked"] = stateLocked;
+          if (stateUnlocking)
+            root["stat_unlocking"] = stateUnlocking;
+          if (stateUnlocked)
+            root["stat_unlocked"] = stateUnlocked;
+          if (stateLocking)
+            root["stat_locking"] = stateLocking;
+          if (stateJammed)
+            root["stat_jam"] = stateJammed;
+        }
+
+        std::string stateTopic; // reports locked/unlocked/locking/unlocking/jammed
+        const char* valueTemplate = nullptr;
+        std::string commandTopic; // required: lock/unlock (and optionally open) commands
+        const char* commandTemplate = nullptr;
+        const char* codeFormat = nullptr; // regex validating the code passed by users
+        const char* payloadLock = nullptr; // default LOCK
+        const char* payloadUnlock = nullptr; // default UNLOCK
+        const char* payloadOpen = nullptr; // unset = HA's lock.open action unavailable
+        const char* payloadReset = nullptr; // default None
+        const char* stateLocked = nullptr; // default LOCKED
+        const char* stateUnlocking = nullptr; // default UNLOCKING
+        const char* stateUnlocked = nullptr; // default UNLOCKED
+        const char* stateLocking = nullptr; // default LOCKING
+        const char* stateJammed = nullptr; // default JAMMED
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
