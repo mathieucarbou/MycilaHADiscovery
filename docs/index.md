@@ -49,21 +49,32 @@ Setup:
 Then query state:
 
 ```c++
-  // some diagnostic info
-  haDiscovery.publish<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart", nullptr, Mycila::HA::Category::DIAGNOSTIC);
-  haDiscovery.publish<Mycila::HA::Counter>("uptime", "Uptime", "~/system/uptime", "duration", nullptr, "s", Mycila::HA::Category::DIAGNOSTIC);
-  haDiscovery.publish<Mycila::HA::Gauge>("memory_used", "Memory Used", "~/system/heap_used", "data_size", "mdi:memory", "B", Mycila::HA::Category::DIAGNOSTIC);
-  haDiscovery.publish<Mycila::HA::State>("ntp", "NTP", "~/ntp/synced", "true", "false", "connectivity", nullptr, Mycila::HA::Category::DIAGNOSTIC);
-  haDiscovery.publish<Mycila::HA::Value>("hostname", "Hostname", "~/config/hostname", nullptr, "mdi:lan", Mycila::HA::Category::DIAGNOSTIC);
-
-  // some configuration
-  haDiscovery.publish<Mycila::HA::Text>("mqtt_publish_interval", "MQTT Publish Interval", "~/config/mqtt_interval/set", "~/config/mqtt_interval", "^\\d+$", "mdi:timer-sand", Mycila::HA::Category::CONFIG);
-  haDiscovery.publish<Mycila::HA::Number>("relay1_power_threshold", "Relay 1 Power Threshold", "~/config/rel1_power/set", "~/config/rel1_power", Mycila::HA::NumberMode::SLIDER, 0, 3000, 50, "mdi:flash", Mycila::HA::Category::CONFIG);
-  haDiscovery.publish<Mycila::HA::Switch>("output1_auto_bypass_enable", "Output 1 Auto Bypass", "~/config/switch/set", "~/config/switch", "true", "false", "mdi:water-boiler-auto", Mycila::HA::Category::CONFIG);
-  haDiscovery.publish<Mycila::HA::Select>("day", "Day", "~/config/day/set", "~/config/day", nullptr, Mycila::HA::Category::CONFIG, std::vector<const char*>{"mon", "tue", "wed", "thu", "fri", "sat", "sun"});
-
-  // some sensors
+  // one-call form: construct and publish in a single statement, when no optional property is needed
   haDiscovery.publish<Mycila::HA::State>("grid", "Grid Electricity", "~/grid/online", "true", "false", "connectivity");
+
+  // when optional properties are needed, create with make_unique and configure them by name
+  auto restart = std::make_unique<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart");
+  restart->category = Mycila::HA::Category::DIAGNOSTIC;
+  haDiscovery.publish(std::move(restart));
+
+  auto uptime = std::make_unique<Mycila::HA::Counter>("uptime", "Uptime", "~/system/uptime", "duration");
+  uptime->unit = "s";
+  uptime->category = Mycila::HA::Category::DIAGNOSTIC;
+  haDiscovery.publish(std::move(uptime));
+
+  auto hostname = std::make_unique<Mycila::HA::Value>("hostname", "Hostname", "~/config/hostname");
+  hostname->icon = "mdi:lan";
+  hostname->category = Mycila::HA::Category::DIAGNOSTIC;
+  haDiscovery.publish(std::move(hostname));
+
+  auto powerThreshold = std::make_unique<Mycila::HA::Number>("relay1_power_threshold", "Relay 1 Power Threshold", "~/config/rel1_power/set", "~/config/rel1_power");
+  powerThreshold->mode = Mycila::HA::NumberMode::SLIDER;
+  powerThreshold->min = 0;
+  powerThreshold->max = 3000;
+  powerThreshold->step = 50;
+  powerThreshold->icon = "mdi:flash";
+  powerThreshold->category = Mycila::HA::Category::CONFIG;
+  haDiscovery.publish(std::move(powerThreshold));
 
   // when you need to modify a component after construction, use std::make_unique + std::move
   std::unique_ptr<Mycila::HA::Outlet> relay1Commute = std::make_unique<Mycila::HA::Outlet>("rel_commute", "Relay 1", "~/relays/rel1/state/set", "~/relays/rel1/state", "on", "off");
@@ -92,6 +103,19 @@ Then query state:
    ```c++
    haDiscovery.publish<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart");
    haDiscovery.publish<Mycila::HA::Gauge>("temperature", "Temperature", "~/sensor/temp", "temperature", nullptr, "°C");
+   ```
+
+When a component's optional `configTopic` override is set, `publish()` and `unpublish()` use it verbatim as the full discovery topic instead of `<discovery_topic>/<type>/<device_id>/<id>/config`. `unpublish()` must be given the same `configTopic` as the original `publish()` to clear the retained configuration — if the override differs or is left empty, the old retained message stays at the broker and Home Assistant keeps the entity:
+
+   ```c++
+   auto sensor = std::make_unique<Mycila::HA::Gauge>("temp1", "Temperature", "~/sensor/temp1", "temperature");
+   sensor->configTopic = "homeassistant/sensor/my_device/temp1/config";
+   haDiscovery.publish(std::move(sensor));
+
+   // later: the override must match exactly to remove it
+   auto old = std::make_unique<Mycila::HA::Gauge>("temp1", "Temperature", "");
+   old->configTopic = "homeassistant/sensor/my_device/temp1/config";
+   haDiscovery.unpublish(std::move(old));
    ```
 
 The [dynamic entities example](https://github.com/mathieucarbou/MycilaHADiscovery/blob/main/examples/DynamicEntities/DynamicEntities.ino) creates components from generated IDs, names and topics, renames an entity while preserving its identity, and removes it. Its factory returns each component before publication: the component owns its strings, so the caller does not need to keep separate backing buffers alive. Constructors accept strings by value and move them into the component. Templates, payloads and constant metadata remain borrowed.

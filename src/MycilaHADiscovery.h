@@ -74,7 +74,7 @@ namespace Mycila {
         const char* deviceClass;
         const char* icon;
         Category category;
-        std::string configTopic; // Full discovery topic override, including /config.
+        std::string configTopic; // Full discovery topic override, including /config. unpublish() must reuse the same override to clear the retained config.
         std::string uniqueId;
         std::string defaultEntityId;
         // Unset values preserve the discovery and Home Assistant defaults.
@@ -558,7 +558,7 @@ namespace Mycila {
         // Equivalent to publish(std::make_unique<T>(args...)).
         //
         // Example:
-        //   haDiscovery.publish<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart", nullptr, Mycila::HA::Category::DIAGNOSTIC);
+        //   haDiscovery.publish<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart");
         template<typename T, typename... Args>
         void publish(Args&&... args) {
           publish(std::make_unique<T>(std::forward<Args>(args)...));
