@@ -368,6 +368,96 @@ namespace Mycila {
         std::optional<float> tempStep;
     };
 
+    // https://www.home-assistant.io/integrations/cover.mqtt/
+    class Cover : public Component {
+      public:
+        Cover(std::string id, std::string name, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : Component("cover", std::move(id), std::move(name), deviceClass, icon, category) {}
+        virtual ~Cover() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (valueTemplate)
+            root["val_tpl"] = valueTemplate;
+          if (!setPositionTopic.empty())
+            root["set_pos_t"] = setPositionTopic;
+          if (setPositionTemplate)
+            root["set_pos_tpl"] = setPositionTemplate;
+          if (!positionTopic.empty())
+            root["pos_t"] = positionTopic;
+          if (positionTemplate)
+            root["pos_tpl"] = positionTemplate;
+          if (payloadOpen)
+            root["pl_open"] = payloadOpen;
+          if (payloadClose)
+            root["pl_cls"] = payloadClose;
+          if (payloadStop)
+            root["pl_stop"] = payloadStop;
+          if (stateOpen)
+            root["stat_open"] = stateOpen;
+          if (stateOpening)
+            root["stat_opening"] = stateOpening;
+          if (stateClosed)
+            root["stat_clsd"] = stateClosed;
+          if (stateClosing)
+            root["stat_closing"] = stateClosing;
+          if (stateStopped)
+            root["stat_stopped"] = stateStopped;
+          if (positionOpen.has_value())
+            root["pos_open"] = positionOpen.value();
+          if (positionClosed.has_value())
+            root["pos_clsd"] = positionClosed.value();
+          if (!tiltCommandTopic.empty())
+            root["tilt_cmd_t"] = tiltCommandTopic;
+          if (tiltCommandTemplate)
+            root["tilt_cmd_tpl"] = tiltCommandTemplate;
+          if (!tiltStatusTopic.empty())
+            root["tilt_status_t"] = tiltStatusTopic;
+          if (tiltStatusTemplate)
+            root["tilt_status_tpl"] = tiltStatusTemplate;
+          if (payloadStopTilt)
+            root["pl_stop_tilt"] = payloadStopTilt;
+          if (tiltOpenedValue.has_value())
+            root["tilt_opnd_val"] = tiltOpenedValue.value();
+          if (tiltClosedValue.has_value())
+            root["tilt_clsd_val"] = tiltClosedValue.value();
+          if (tiltMin.has_value())
+            root["tilt_min"] = tiltMin.value();
+          if (tiltMax.has_value())
+            root["tilt_max"] = tiltMax.value();
+        }
+
+        std::string commandTopic; // open/close/stop commands
+        std::string stateTopic; // reports open/opening/closed/closing/stopped
+        const char* valueTemplate = nullptr;
+        std::string setPositionTopic; // receives position 0-100 when the cover is controllable
+        const char* setPositionTemplate = nullptr;
+        std::string positionTopic; // optional separate topic reporting current position 0-100
+        const char* positionTemplate = nullptr;
+        const char* payloadOpen = nullptr; // default OPEN
+        const char* payloadClose = nullptr; // default CLOSE
+        const char* payloadStop = nullptr; // default STOP
+        const char* stateOpen = nullptr; // default open
+        const char* stateOpening = nullptr; // default opening
+        const char* stateClosed = nullptr; // default closed
+        const char* stateClosing = nullptr; // default closing
+        const char* stateStopped = nullptr; // default stopped
+        std::optional<int> positionOpen; // default 100
+        std::optional<int> positionClosed; // default 0
+        std::string tiltCommandTopic;
+        const char* tiltCommandTemplate = nullptr;
+        std::string tiltStatusTopic;
+        const char* tiltStatusTemplate = nullptr;
+        const char* payloadStopTilt = nullptr; // default STOP
+        std::optional<int> tiltOpenedValue; // default 100
+        std::optional<int> tiltClosedValue; // default 0
+        std::optional<int> tiltMin; // default 0
+        std::optional<int> tiltMax; // default 100
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
