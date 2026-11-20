@@ -723,6 +723,62 @@ namespace Mycila {
         std::optional<bool> supportVolumeSet; // default true
     };
 
+    // https://www.home-assistant.io/integrations/valve.mqtt/
+    // stateTopic accepts state payloads (open, opening, closed, closing) or, when
+    // reportsPosition is true, numeric position values 0-100.
+    class Valve : public Component {
+      public:
+        Valve(std::string id, std::string name, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : Component("valve", std::move(id), std::move(name), deviceClass, icon, category) {}
+        virtual ~Valve() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (commandTemplate)
+            root["cmd_tpl"] = commandTemplate;
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (valueTemplate)
+            root["val_tpl"] = valueTemplate;
+          if (reportsPosition.has_value())
+            root["pos"] = reportsPosition.value();
+          if (positionOpen.has_value())
+            root["pos_open"] = positionOpen.value();
+          if (positionClosed.has_value())
+            root["pos_clsd"] = positionClosed.value();
+          if (payloadOpen)
+            root["pl_open"] = payloadOpen;
+          if (payloadClose)
+            root["pl_cls"] = payloadClose;
+          if (payloadStop)
+            root["pl_stop"] = payloadStop;
+          if (stateOpen)
+            root["stat_open"] = stateOpen;
+          if (stateOpening)
+            root["stat_opening"] = stateOpening;
+          if (stateClosed)
+            root["stat_clsd"] = stateClosed;
+          if (stateClosing)
+            root["stat_closing"] = stateClosing;
+        }
+
+        std::string commandTopic; // open/close (payloads) or position when reportsPosition is true
+        const char* commandTemplate = nullptr;
+        std::string stateTopic; // states or position values; enables non-optimistic mode
+        const char* valueTemplate = nullptr;
+        std::optional<bool> reportsPosition; // default false; enables position state/commands
+        std::optional<int> positionOpen; // default 100; used with reportsPosition
+        std::optional<int> positionClosed; // default 0; used with reportsPosition
+        const char* payloadOpen = nullptr; // default OPEN
+        const char* payloadClose = nullptr; // default CLOSE
+        const char* payloadStop = nullptr; // unset = HA's valve.stop action unavailable
+        const char* stateOpen = nullptr; // default open
+        const char* stateOpening = nullptr; // default opening
+        const char* stateClosed = nullptr; // default closed
+        const char* stateClosing = nullptr; // default closing
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
