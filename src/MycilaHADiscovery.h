@@ -501,7 +501,8 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/update.mqtt/ (no state class)
     class Update : public Component {
       public:
-        Update(std::string id, std::string name, std::string url = {}, std::string stateTopic = {}, std::string latestVersionTopic = {}, const char* deviceClass = "firmware", const char* icon = nullptr, const Category category = Category::NONE)
+        // stateTopic is required by Home Assistant. Pass "" for url or latestVersionTopic when not used.
+        Update(std::string id, std::string name, std::string url, std::string stateTopic, std::string latestVersionTopic = {}, const char* deviceClass = "firmware", const char* icon = nullptr, const Category category = Category::NONE)
             : Component("update", std::move(id), std::move(name), deviceClass, icon, category) {
           this->stateTopic = std::move(stateTopic);
           this->url = std::move(url);
