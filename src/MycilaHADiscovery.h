@@ -560,6 +560,93 @@ namespace Mycila {
         std::vector<const char*> presetModes;
     };
 
+    // https://www.home-assistant.io/integrations/date.mqtt/
+    // State and commands are ISO 8601 dates (YYYY-MM-DD).
+    class Date : public Component {
+      public:
+        Date(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const char* icon = nullptr, const Category category = Category::NONE) : Component("date", std::move(id), std::move(name), nullptr, icon, category) {
+          this->commandTopic = std::move(commandTopic);
+          this->stateTopic = std::move(stateTopic);
+        }
+        virtual ~Date() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (commandTemplate)
+            root["cmd_tpl"] = commandTemplate;
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (valueTemplate)
+            root["val_tpl"] = valueTemplate;
+        }
+
+        std::string commandTopic;
+        const char* commandTemplate = nullptr;
+        std::string stateTopic;
+        const char* valueTemplate = nullptr;
+    };
+
+    // https://www.home-assistant.io/integrations/time.mqtt/
+    // State and commands are ISO 8601 times (HH:MM:SS).
+    class Time : public Component {
+      public:
+        Time(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const char* icon = nullptr, const Category category = Category::NONE) : Component("time", std::move(id), std::move(name), nullptr, icon, category) {
+          this->commandTopic = std::move(commandTopic);
+          this->stateTopic = std::move(stateTopic);
+        }
+        virtual ~Time() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (commandTemplate)
+            root["cmd_tpl"] = commandTemplate;
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (valueTemplate)
+            root["val_tpl"] = valueTemplate;
+        }
+
+        std::string commandTopic;
+        const char* commandTemplate = nullptr;
+        std::string stateTopic;
+        const char* valueTemplate = nullptr;
+    };
+
+    // https://www.home-assistant.io/integrations/datetime.mqtt/
+    // State and commands are ISO 8601 datetimes (YYYY-MM-DDTHH:MM:SS[±HH:MM]).
+    class Datetime : public Component {
+      public:
+        Datetime(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const char* icon = nullptr, const Category category = Category::NONE) : Component("datetime", std::move(id), std::move(name), nullptr, icon, category) {
+          this->commandTopic = std::move(commandTopic);
+          this->stateTopic = std::move(stateTopic);
+        }
+        virtual ~Datetime() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (commandTemplate)
+            root["cmd_tpl"] = commandTemplate;
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (valueTemplate)
+            root["val_tpl"] = valueTemplate;
+          if (timezone)
+            root["tz"] = timezone;
+        }
+
+        std::string commandTopic;
+        const char* commandTemplate = nullptr;
+        std::string stateTopic;
+        const char* valueTemplate = nullptr;
+        const char* timezone = nullptr; // IANA name (e.g. Europe/Paris) used when the payload has no timezone
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
