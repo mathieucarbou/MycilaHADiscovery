@@ -53,9 +53,6 @@ namespace Mycila {
     class Component {
       public:
         Component(const char* type, std::string id, std::string name, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : type(type), id(std::move(id)), name(std::move(name)), deviceClass(deviceClass), icon(icon), category(category) {}
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Component(const char* type, const char* id, const char* name, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE)
-            : Component(type, stringOrEmpty(id), stringOrEmpty(name), deviceClass, icon, category) {}
         virtual ~Component() = default;
 
         virtual void toJson(const JsonObject& root) {
@@ -92,10 +89,6 @@ namespace Mycila {
         const char* availabilityTemplate = nullptr;
         const char* payloadAvailable = nullptr;
         const char* payloadNotAvailable = nullptr;
-
-      protected:
-        // Legacy constructors accepted nullptr for omitted string values.
-        static std::string stringOrEmpty(const char* value) { return value ? value : ""; }
     };
 
     // https://www.home-assistant.io/integrations/button.mqtt/
@@ -103,9 +96,6 @@ namespace Mycila {
       public:
         Button(std::string id, std::string name) : Button(std::move(id), std::move(name), {}) {}
         Button(std::string id, std::string name, std::string commandTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : Component("button", std::move(id), std::move(name), deviceClass, icon, category) { this->commandTopic = std::move(commandTopic); }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Button(const char* id, const char* name, const char* commandTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE)
-            : Button(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(commandTopic), deviceClass, icon, category) {}
         virtual ~Button() = default;
 
         void toJson(const JsonObject& root) override {
@@ -130,9 +120,6 @@ namespace Mycila {
           this->payloadOn = payloadOn;
           this->payloadOff = payloadOff;
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Switch(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* icon = nullptr, const Category category = Category::NONE)
-            : Switch(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(commandTopic), stringOrEmpty(stateTopic), payloadOn, payloadOff, icon, category) {}
         virtual ~Switch() = default;
 
         void toJson(const JsonObject& root) override {
@@ -165,9 +152,6 @@ namespace Mycila {
           this->payloadOn = payloadOn;
           this->payloadOff = payloadOff;
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Outlet(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* icon = nullptr, const Category category = Category::NONE)
-            : Outlet(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(commandTopic), stringOrEmpty(stateTopic), payloadOn, payloadOff, icon, category) {}
         virtual ~Outlet() = default;
 
         void toJson(const JsonObject& root) override {
@@ -199,9 +183,6 @@ namespace Mycila {
           this->stateTopic = std::move(stateTopic);
           this->options = std::move(options);
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Select(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* icon = nullptr, const Category category = Category::NONE, std::vector<const char*> options = {})
-            : Select(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(commandTopic), stringOrEmpty(stateTopic), icon, category, std::move(options)) {}
         virtual ~Select() = default;
 
         void toJson(const JsonObject& root) override {
@@ -231,9 +212,6 @@ namespace Mycila {
           this->stateTopic = std::move(stateTopic);
           this->pattern = pattern;
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Text(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const char* pattern = nullptr, const char* icon = nullptr, const Category category = Category::NONE)
-            : Text(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(commandTopic), stringOrEmpty(stateTopic), pattern, icon, category) {}
         virtual ~Text() = default;
 
         void toJson(const JsonObject& root) override {
@@ -266,9 +244,6 @@ namespace Mycila {
           this->max = max;
           this->step = step;
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Number(const char* id, const char* name, const char* commandTopic, const char* stateTopic, const NumberMode mode = NumberMode::AUTO, const float min = 0, const float max = 100, const float step = 1, const char* icon = nullptr, const Category category = Category::NONE)
-            : Number(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(commandTopic), stringOrEmpty(stateTopic), mode, min, max, step, icon, category) {}
         virtual ~Number() = default;
 
         void toJson(const JsonObject& root) override {
@@ -402,9 +377,6 @@ namespace Mycila {
           this->payloadOn = payloadOn;
           this->payloadOff = payloadOff;
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        State(const char* id, const char* name, const char* stateTopic, const char* payloadOn, const char* payloadOff, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE)
-            : State(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(stateTopic), payloadOn, payloadOff, deviceClass, icon, category) {}
         virtual ~State() = default;
 
         void toJson(const JsonObject& root) override {
@@ -434,9 +406,6 @@ namespace Mycila {
           this->stateTopic = std::move(stateTopic);
           this->stateClass = stateClass;
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Sensor(const char* id, const char* name, const char* stateTopic, const StateClass stateClass = StateClass::NONE, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE)
-            : Sensor(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(stateTopic), stateClass, deviceClass, icon, unit, category) {}
         virtual ~Sensor() = default;
 
         void toJson(const JsonObject& root) override {
@@ -469,9 +438,6 @@ namespace Mycila {
             : Sensor(std::move(id), std::move(name), std::move(stateTopic), StateClass::GAUGE, deviceClass, icon, unit, category) {
           this->valueTemplate = valueTemplate;
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Gauge(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
-            : Gauge(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(stateTopic), deviceClass, icon, unit, category, valueTemplate) {}
         virtual ~Gauge() = default;
     };
 
@@ -483,9 +449,6 @@ namespace Mycila {
             : Sensor(std::move(id), std::move(name), std::move(stateTopic), StateClass::COUNTER, deviceClass, icon, unit, category) {
           this->valueTemplate = valueTemplate;
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Counter(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
-            : Counter(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(stateTopic), deviceClass, icon, unit, category, valueTemplate) {}
         virtual ~Counter() = default;
     };
 
@@ -494,9 +457,6 @@ namespace Mycila {
       public:
         Total(std::string id, std::string name, std::string stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE)
             : Sensor(std::move(id), std::move(name), std::move(stateTopic), StateClass::TOTAL, deviceClass, icon, unit, category) {}
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Total(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE)
-            : Total(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(stateTopic), deviceClass, icon, unit, category) {}
         virtual ~Total() = default;
     };
 
@@ -508,9 +468,6 @@ namespace Mycila {
             : Sensor(std::move(id), std::move(name), std::move(stateTopic), StateClass::NONE, deviceClass, icon, nullptr, category) {
           this->valueTemplate = valueTemplate;
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Value(const char* id, const char* name, const char* stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
-            : Value(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(stateTopic), deviceClass, icon, category, valueTemplate) {}
         virtual ~Value() = default;
     };
 
@@ -522,9 +479,6 @@ namespace Mycila {
           this->valueTemplate = valueTemplate;
           this->options = std::move(options);
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Enum(const char* id, const char* name, const char* stateTopic, std::vector<const char*> options, const char* icon = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
-            : Enum(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(stateTopic), std::move(options), icon, category, valueTemplate) {}
         virtual ~Enum() = default;
 
         void toJson(const JsonObject& root) override {
@@ -546,9 +500,6 @@ namespace Mycila {
           this->url = std::move(url);
           this->latestVersionTopic = std::move(latestVersionTopic);
         }
-        [[deprecated("Use std::string arguments and empty strings instead of nullptr")]]
-        Update(const char* id, const char* name, const char* url = nullptr, const char* stateTopic = nullptr, const char* latestVersionTopic = nullptr, const char* deviceClass = "firmware", const char* icon = nullptr, const Category category = Category::NONE)
-            : Update(stringOrEmpty(id), stringOrEmpty(name), stringOrEmpty(url), stringOrEmpty(stateTopic), stringOrEmpty(latestVersionTopic), deviceClass, icon, category) {}
         virtual ~Update() = default;
 
         void toJson(const JsonObject& root) override {

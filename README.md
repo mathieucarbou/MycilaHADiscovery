@@ -100,16 +100,10 @@ The [dynamic entities example](examples/DynamicEntities/DynamicEntities.ino) cre
 
 The example prints discovery topics and payloads to Serial. To use it with Home Assistant, replace the publisher callback with your MQTT transport and publish discovery messages with the retain flag set. Sensor readings are published separately on each sensor's state topic.
 
-The previous `const char*` constructor signatures remain available as deprecated overloads. They convert `nullptr` in owned string arguments to empty strings and delegate to the owning constructors, so existing nullable calls continue to work:
+Component constructors take `std::string` arguments by value and move them into the component; string literals convert implicitly. `nullptr` is not accepted where a `std::string` is expected: use an empty string for omitted values, and use `clear()` instead of assigning `nullptr` to an owned field. For example, removal only needs the identity:
 
 ```c++
-  // Legacy constructor (deprecated).
-  haDiscovery.unpublish<Mycila::HA::Value>("firmware_filename", nullptr, nullptr);
-
-  // Current API: removal only needs the identity.
   haDiscovery.unpublish<Mycila::HA::Value>("firmware_filename", "");
 ```
-
-Full constructor calls with string literals also select the deprecated overloads. Pass `std::string` arguments to select the owning overloads explicitly. The new API uses empty strings for omitted values, including calls that mix `std::string` and string literals; use `clear()` or an empty string instead of assigning `nullptr` to an owned field.
 
 Usage example in YaSolR: https://github.com/mathieucarbou/YaSolR/blob/main/src/yasolr_mqtt.cpp
