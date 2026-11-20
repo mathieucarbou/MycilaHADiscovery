@@ -15,6 +15,7 @@ Simple and efficient Home Assistant Discovery library for Arduino / ESP32
   - select
   - slider / box with min, max, step
   - input (number and text)
+  - climate (with temperature, mode, action and preset topics)
 - Sensors:
   - text
   - binary (state)
@@ -23,6 +24,7 @@ Simple and efficient Home Assistant Discovery library for Arduino / ESP32
 - Supports regex validation
 - Supports availability (global and per component)
 - Supports device class, icon, state class, unit of measurement
+- Supports optional entity IDs, enabled-by-default settings and sensor expiration
 
 ## Basic Usage
 
@@ -118,7 +120,7 @@ When a component's optional `configTopic` override is set, `publish()` and `unpu
    haDiscovery.unpublish(std::move(old));
    ```
 
-The [dynamic entities example](https://github.com/mathieucarbou/MycilaHADiscovery/blob/main/examples/DynamicEntities/DynamicEntities.ino) creates components from generated IDs, names and topics, renames an entity while preserving its identity, and removes it. Its factory returns each component before publication: the component owns its strings, so the caller does not need to keep separate backing buffers alive. Constructors accept strings by value and move them into the component. Templates, payloads and constant metadata remain borrowed.
+The [dynamic entities example](examples/DynamicEntities/DynamicEntities.ino) creates components from generated IDs, names and topics, renames an entity while preserving its identity, and removes it. Its factory returns each component before publication: the component owns its strings, so the caller does not need to keep separate backing buffers alive. Constructors accept strings by value and move them into the component. Templates, payloads and constant metadata remain borrowed.
 
 The example prints discovery topics and payloads to Serial. To use it with Home Assistant, replace the publisher callback with your MQTT transport and publish discovery messages with the retain flag set. Sensor readings are published separately on each sensor's state topic.
 
