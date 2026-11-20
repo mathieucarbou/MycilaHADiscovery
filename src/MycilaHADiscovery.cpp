@@ -95,16 +95,6 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   // component
   component->toJson(root);
 
-  const bool sensor = strcmp(component->type, "sensor") == 0;
-  if (sensor || strcmp(component->type, "binary_sensor") == 0) {
-    const uint32_t expirationTime = component->expireAfter.value_or(sensor ? _sensorExpirationTime : 0);
-    if (expirationTime > 0) {
-      root["exp_aft"] = expirationTime;
-    } else if (component->expireAfter.has_value()) {
-      root.remove("exp_aft");
-    }
-  }
-
   if (doc.overflowed()) {
     LOGE(TAG, "Not enough memory for discovery config");
     return;

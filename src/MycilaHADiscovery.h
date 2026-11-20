@@ -22,10 +22,6 @@
   #define MYCILA_HA_DISCOVERY_TOPIC "homeassistant"
 #endif
 
-#ifndef MYCILA_HA_SENSOR_EXPIRATION_TIME
-  #define MYCILA_HA_SENSOR_EXPIRATION_TIME 0
-#endif
-
 namespace Mycila {
   namespace HA {
     enum class Category { NONE,
@@ -83,7 +79,6 @@ namespace Mycila {
         std::string defaultEntityId;
         // Unset values preserve the discovery and Home Assistant defaults.
         std::optional<bool> enabledByDefault;
-        std::optional<uint32_t> expireAfter; // 0 disables expiration.
         bool useDeviceAvailability = true;
         std::string availabilityTopic;
         const char* availabilityTemplate = nullptr;
@@ -389,12 +384,15 @@ namespace Mycila {
             root["pl_on"] = payloadOn;
           if (payloadOff)
             root["pl_off"] = payloadOff;
+          if (expireAfter.value_or(0) > 0)
+            root["exp_aft"] = expireAfter.value();
         }
 
         std::string stateTopic;
         const char* valueTemplate = nullptr;
         const char* payloadOn = nullptr;
         const char* payloadOff = nullptr;
+        std::optional<uint32_t> expireAfter; // expire_after in seconds; unset or 0 disables expiration
     };
 
     // https://www.home-assistant.io/integrations/sensor.mqtt/
@@ -422,12 +420,15 @@ namespace Mycila {
             root["stat_t"] = stateTopic;
           if (valueTemplate)
             root["val_tpl"] = valueTemplate;
+          if (expireAfter.value_or(0) > 0)
+            root["exp_aft"] = expireAfter.value();
         }
 
         const char* unit = nullptr;
         std::string stateTopic;
         StateClass stateClass = StateClass::NONE;
         const char* valueTemplate = nullptr;
+        std::optional<uint32_t> expireAfter; // expire_after in seconds; unset or 0 disables expiration
     };
 
     // https://www.home-assistant.io/integrations/sensor.mqtt/ (measurement)
@@ -534,9 +535,6 @@ namespace Mycila {
         // OPTIONAL: set will topic (absolute), default to empty string, which is disabled
         void setWillTopic(std::string willTopic) { _willTopic = std::move(willTopic); };
 
-        // OPTIONAL: sensor expiration time in seconds, 0 for no expiration, default to MYCILA_HA_SENSOR_EXPIRATION_TIME
-        void setSensorExpirationTime(const uint32_t sensorExpirationTime) { _sensorExpirationTime = sensorExpirationTime; };
-
         // called each time before publishing components
         // will prepare the buffers
         void begin(Device device, std::string baseTopic, PublisherCallback publisher) { begin(device, baseTopic, 1024, std::move(publisher)); }
@@ -577,7 +575,6 @@ namespace Mycila {
         std::string _baseTopic;
         std::string _discoveryTopic = MYCILA_HA_DISCOVERY_TOPIC;
         std::string _willTopic;
-        uint32_t _sensorExpirationTime = MYCILA_HA_SENSOR_EXPIRATION_TIME;
     };
   } // namespace HA
 } // namespace Mycila
