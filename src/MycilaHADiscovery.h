@@ -458,6 +458,108 @@ namespace Mycila {
         std::optional<int> tiltMax; // default 100
     };
 
+    // https://www.home-assistant.io/integrations/fan.mqtt/
+    class Fan : public Component {
+      public:
+        Fan(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("fan", std::move(id), std::move(name), nullptr, icon, category) {}
+        virtual ~Fan() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (commandTemplate)
+            root["cmd_tpl"] = commandTemplate;
+          if (payloadOn)
+            root["pl_on"] = payloadOn;
+          if (payloadOff)
+            root["pl_off"] = payloadOff;
+          if (stateValueTemplate)
+            root["stat_val_tpl"] = stateValueTemplate;
+          if (!percentageCommandTopic.empty())
+            root["pct_cmd_t"] = percentageCommandTopic;
+          if (percentageCommandTemplate)
+            root["pct_cmd_tpl"] = percentageCommandTemplate;
+          if (!percentageStateTopic.empty())
+            root["pct_stat_t"] = percentageStateTopic;
+          if (percentageValueTemplate)
+            root["pct_val_tpl"] = percentageValueTemplate;
+          if (payloadResetPercentage)
+            root["pl_rst_pct"] = payloadResetPercentage;
+          if (speedRangeMin.has_value())
+            root["spd_rng_min"] = speedRangeMin.value();
+          if (speedRangeMax.has_value())
+            root["spd_rng_max"] = speedRangeMax.value();
+          if (!oscillationCommandTopic.empty())
+            root["osc_cmd_t"] = oscillationCommandTopic;
+          if (oscillationCommandTemplate)
+            root["osc_cmd_tpl"] = oscillationCommandTemplate;
+          if (!oscillationStateTopic.empty())
+            root["osc_stat_t"] = oscillationStateTopic;
+          if (oscillationValueTemplate)
+            root["osc_val_tpl"] = oscillationValueTemplate;
+          if (payloadOscillationOn)
+            root["pl_osc_on"] = payloadOscillationOn;
+          if (payloadOscillationOff)
+            root["pl_osc_off"] = payloadOscillationOff;
+          if (!directionCommandTopic.empty())
+            root["dir_cmd_t"] = directionCommandTopic;
+          if (directionCommandTemplate)
+            root["dir_cmd_tpl"] = directionCommandTemplate;
+          if (!directionStateTopic.empty())
+            root["dir_stat_t"] = directionStateTopic;
+          if (directionValueTemplate)
+            root["dir_val_tpl"] = directionValueTemplate;
+          if (!presetModeCommandTopic.empty())
+            root["pr_mode_cmd_t"] = presetModeCommandTopic;
+          if (presetModeCommandTemplate)
+            root["pr_mode_cmd_tpl"] = presetModeCommandTemplate;
+          if (!presetModeStateTopic.empty())
+            root["pr_mode_stat_t"] = presetModeStateTopic;
+          if (presetModeValueTemplate)
+            root["pr_mode_val_tpl"] = presetModeValueTemplate;
+          if (payloadResetPresetMode)
+            root["pl_rst_pr_mode"] = payloadResetPresetMode;
+          if (!presetModes.empty()) {
+            JsonArray opts = root["pr_modes"].to<JsonArray>();
+            for (auto& opt : presetModes)
+              opts.add(opt);
+          }
+        }
+
+        std::string stateTopic; // reports on/off
+        std::string commandTopic;
+        const char* commandTemplate = nullptr;
+        const char* payloadOn = nullptr; // default ON
+        const char* payloadOff = nullptr; // default OFF
+        const char* stateValueTemplate = nullptr; // template for stateTopic when on/off payloads are custom
+        std::string percentageCommandTopic; // 0-100 speed
+        const char* percentageCommandTemplate = nullptr;
+        std::string percentageStateTopic;
+        const char* percentageValueTemplate = nullptr;
+        const char* payloadResetPercentage = nullptr; // default None; payload resetting speed to HA default
+        std::optional<int> speedRangeMin; // default 1
+        std::optional<int> speedRangeMax; // default 100
+        std::string oscillationCommandTopic;
+        const char* oscillationCommandTemplate = nullptr;
+        std::string oscillationStateTopic;
+        const char* oscillationValueTemplate = nullptr;
+        const char* payloadOscillationOn = nullptr; // default oscillate_on
+        const char* payloadOscillationOff = nullptr; // default oscillate_off
+        std::string directionCommandTopic; // forward/reverse
+        const char* directionCommandTemplate = nullptr;
+        std::string directionStateTopic;
+        const char* directionValueTemplate = nullptr;
+        std::string presetModeCommandTopic; // must be set together with presetModes
+        const char* presetModeCommandTemplate = nullptr;
+        std::string presetModeStateTopic;
+        const char* presetModeValueTemplate = nullptr;
+        const char* payloadResetPresetMode = nullptr; // default None
+        std::vector<const char*> presetModes;
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
