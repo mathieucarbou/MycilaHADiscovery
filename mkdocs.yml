@@ -1,0 +1,96 @@
+site_name: MycilaHADiscovery
+site_url: https://mathieu.carbou.me/MycilaHADiscovery/
+repo_url: https://github.com/mathieucarbou/MycilaHADiscovery
+repo_name: mathieucarbou/MycilaHADiscovery
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+    - content.code.annotate
+  palette:
+    # Home Assistant blue
+    - scheme: default
+      primary: deep purple
+      accent: light blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: light blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search
+  - mkdoxy:
+      projects:
+        cppapi:
+          src-dirs: src/
+          full-doc: True
+          doxy-cfg:
+            PROJECT_NAME: MycilaHADiscovery
+            RECURSIVE: YES
+            EXTRACT_ALL: YES
+            FILE_PATTERNS: "Mycila*.h"
+            QUIET: YES
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Basic Usage: usage.md
+  - Components:
+      - Overview: components/index.md
+      - Button: components/button.md
+      - Switch and Outlet: components/switch.md
+      - Select: components/select.md
+      - Text: components/text.md
+      - Number: components/number.md
+      - Climate: components/climate.md
+      - Cover: components/cover.md
+      - Fan: components/fan.md
+      - Date / Time / Datetime: components/datetime.md
+      - Notify: components/notify.md
+      - Siren: components/siren.md
+      - Valve: components/valve.md
+      - Humidifier: components/humidifier.md
+      - Lock: components/lock.md
+      - Water Heater: components/water-heater.md
+      - Device Tracker: components/device-tracker.md
+      - Light: components/light.md
+      - Sensors: components/sensors.md
+      - Update: components/update.md
+  - Availability: availability.md
+  - Dynamic Entities: dynamic-entities.md
+  - API Reference: api.md
+  - Contributing: contributing.md
+  - C++ API:
+      - Annotated Classes: cppapi/annotated.md
+      - Class Hierarchy: cppapi/hierarchy.md
+      - All Classes: cppapi/classes.md
+      - Namespaces: cppapi/namespaces.md
+      - Files: cppapi/files.md

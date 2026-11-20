@@ -1,0 +1,40 @@
+/* Home Assistant brand blue for the site header and links */
+:root > * {
+  --md-primary-fg-color: #03a9f4;
+  --md-primary-fg-color--light: #4fc3f7;
+  --md-primary-fg-color--dark: #0288d1;
+  --md-accent-fg-color: #03a9f4;
+}
+
+.md-typeset a,
+.md-nav__link:focus,
+.md-nav__link:hover {
+  color: var(--md-primary-fg-color);
+}
+
+/* table styling closer to the Home Assistant docs */
+.md-typeset table:not([class]) {
+  font-size: 0.72rem;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: var(--md-default-fg-color--lightest);
+}
+
+.md-typeset code,
+.md-typeset kbd,
+.md-typeset pre {
+  font-size: 0.8em;
+}
+
+/* Components list shown in the right sidebar on component pages,
+   mirroring the Home Assistant documentation layout. */
+.md-nav .md-ha-components .md-nav__link .md-ellipsis {
+  font-size: 0.68rem;
+}
+
+.md-nav .md-ha-components .md-nav__link--active .md-ellipsis,
+.md-nav .md-ha-components .md-nav__link:hover .md-ellipsis {
+  color: var(--md-primary-fg-color);
+  font-weight: 600;
+}
