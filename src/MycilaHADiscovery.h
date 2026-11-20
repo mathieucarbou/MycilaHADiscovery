@@ -1001,6 +1001,44 @@ namespace Mycila {
         std::optional<float> initial; // initial target temperature on startup
     };
 
+    // https://www.home-assistant.io/integrations/device_tracker.mqtt/
+    // stateTopic payloads are home, not_home or a custom location/zone name; when
+    // jsonAttributesTopic publishes GPS data, stateTopic can be omitted.
+    class DeviceTracker : public Component {
+      public:
+        DeviceTracker(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("device_tracker", std::move(id), std::move(name), nullptr, icon, category) {}
+        virtual ~DeviceTracker() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (valueTemplate)
+            root["val_tpl"] = valueTemplate;
+          if (!jsonAttributesTopic.empty())
+            root["json_attr_t"] = jsonAttributesTopic;
+          if (jsonAttributesTemplate)
+            root["json_attr_tpl"] = jsonAttributesTemplate;
+          if (payloadHome)
+            root["pl_home"] = payloadHome;
+          if (payloadNotHome)
+            root["pl_not_home"] = payloadNotHome;
+          if (payloadReset)
+            root["pl_rst"] = payloadReset;
+          if (sourceType)
+            root["src_type"] = sourceType;
+        }
+
+        std::string stateTopic; // home / not_home / custom location; omitted when jsonAttributesTopic is used
+        const char* valueTemplate = nullptr;
+        std::string jsonAttributesTopic; // publishes GPS/JSON location data
+        const char* jsonAttributesTemplate = nullptr;
+        const char* payloadHome = nullptr; // default home
+        const char* payloadNotHome = nullptr; // default not_home
+        const char* payloadReset = nullptr; // default None; falls back to zone-derived location
+        const char* sourceType = nullptr; // gps, router, bluetooth or bluetooth_le
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
