@@ -668,6 +668,61 @@ namespace Mycila {
         const char* commandTemplate = nullptr;
     };
 
+    // https://www.home-assistant.io/integrations/siren.mqtt/
+    // With no command topic and template, Home Assistant publishes {"state": "on", "tone": ...,
+    // "duration": ..., "volume_level": ...} as JSON to the command topic. With a template,
+    // those values are available as variables named state, tone, duration and volume_level.
+    // Without command_topic, Home Assistant runs the siren in receive-only mode.
+    class Siren : public Component {
+      public:
+        Siren(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("siren", std::move(id), std::move(name), nullptr, icon, category) {}
+        virtual ~Siren() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (commandTemplate)
+            root["cmd_tpl"] = commandTemplate;
+          if (commandOffTemplate)
+            root["cmd_off_tpl"] = commandOffTemplate;
+          if (payloadOn)
+            root["pl_on"] = payloadOn;
+          if (payloadOff)
+            root["pl_off"] = payloadOff;
+          if (stateOn)
+            root["stat_on"] = stateOn;
+          if (stateOff)
+            root["stat_off"] = stateOff;
+          if (stateValueTemplate)
+            root["stat_val_tpl"] = stateValueTemplate;
+          if (!availableTones.empty()) {
+            JsonArray opts = root["av_tones"].to<JsonArray>();
+            for (auto& opt : availableTones)
+              opts.add(opt);
+          }
+          if (supportDuration.has_value())
+            root["sup_dur"] = supportDuration.value();
+          if (supportVolumeSet.has_value())
+            root["sup_vol"] = supportVolumeSet.value();
+        }
+
+        std::string stateTopic;
+        std::string commandTopic; // required for the siren to be controllable from Home Assistant
+        const char* commandTemplate = nullptr;
+        const char* commandOffTemplate = nullptr;
+        const char* payloadOn = nullptr; // default ON
+        const char* payloadOff = nullptr; // default OFF
+        const char* stateOn = nullptr; // default on
+        const char* stateOff = nullptr; // default off
+        const char* stateValueTemplate = nullptr;
+        std::vector<const char*> availableTones; // enables the tone capability
+        std::optional<bool> supportDuration; // default true
+        std::optional<bool> supportVolumeSet; // default true
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
