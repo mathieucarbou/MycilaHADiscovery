@@ -8,20 +8,6 @@
 #include <string>
 #include <utility>
 
-#ifdef MYCILA_LOGGER_SUPPORT
-  #include <MycilaLogger.h>
-extern Mycila::Logger logger;
-  #define LOGD(tag, format, ...) logger.debug(tag, format, ##__VA_ARGS__)
-  #define LOGI(tag, format, ...) logger.info(tag, format, ##__VA_ARGS__)
-  #define LOGW(tag, format, ...) logger.warn(tag, format, ##__VA_ARGS__)
-  #define LOGE(tag, format, ...) logger.error(tag, format, ##__VA_ARGS__)
-#else
-  #define LOGD(tag, format, ...) ESP_LOGD(tag, format, ##__VA_ARGS__)
-  #define LOGI(tag, format, ...) ESP_LOGI(tag, format, ##__VA_ARGS__)
-  #define LOGW(tag, format, ...) ESP_LOGW(tag, format, ##__VA_ARGS__)
-  #define LOGE(tag, format, ...) ESP_LOGE(tag, format, ##__VA_ARGS__)
-#endif
-
 #define TAG "HA"
 
 namespace Mycila {
@@ -121,7 +107,7 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   component->toJson(root);
 
   if (doc.overflowed()) {
-    LOGE(TAG, "Not enough memory for discovery config");
+    ESP_LOGE(TAG, "Not enough memory for discovery config");
     return;
   }
 
@@ -131,7 +117,7 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
 
   const std::string topic = componentConfigTopic(component.get(), _discoveryTopic, _device.id);
 
-  LOGD(TAG, "%s [%d b]", topic.c_str(), buffer.length());
+  ESP_LOGD(TAG, "%s [%d b]", topic.c_str(), buffer.length());
   _publisher(topic.c_str(), buffer);
 }
 
@@ -150,7 +136,7 @@ void Mycila::HA::Discovery::unpublish(std::unique_ptr<Component> component) {
 
   const std::string topic = componentConfigTopic(component.get(), _discoveryTopic, _device.id);
 
-  LOGD(TAG, "unpublish: %s", topic.c_str());
+  ESP_LOGD(TAG, "unpublish: %s", topic.c_str());
   _publisher(topic.c_str(), "");
 }
 
