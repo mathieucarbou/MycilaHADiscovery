@@ -922,6 +922,85 @@ namespace Mycila {
         const char* stateJammed = nullptr; // default JAMMED
     };
 
+    // https://www.home-assistant.io/integrations/water_heater.mqtt/
+    // Modes are a subset of: off, eco, electric, gas, heat_pump, high_demand, performance.
+    class WaterHeater : public Component {
+      public:
+        WaterHeater(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("water_heater", std::move(id), std::move(name), nullptr, icon, category) {}
+        virtual ~WaterHeater() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!currentTemperatureTopic.empty())
+            root["curr_temp_t"] = currentTemperatureTopic;
+          if (currentTemperatureTemplate)
+            root["curr_temp_tpl"] = currentTemperatureTemplate;
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (payloadOn)
+            root["pl_on"] = payloadOn;
+          if (payloadOff)
+            root["pl_off"] = payloadOff;
+          if (precision.has_value())
+            root["precision"] = precision.value();
+          if (!powerCommandTopic.empty())
+            root["pow_cmd_t"] = powerCommandTopic;
+          if (powerCommandTemplate)
+            root["pow_cmd_tpl"] = powerCommandTemplate;
+          if (!temperatureCommandTopic.empty())
+            root["temp_cmd_t"] = temperatureCommandTopic;
+          if (temperatureCommandTemplate)
+            root["temp_cmd_tpl"] = temperatureCommandTemplate;
+          if (!temperatureStateTopic.empty())
+            root["temp_stat_t"] = temperatureStateTopic;
+          if (temperatureStateTemplate)
+            root["temp_stat_tpl"] = temperatureStateTemplate;
+          if (temperatureUnit)
+            root["temp_unit"] = temperatureUnit;
+          if (minTemp.has_value())
+            root["min_temp"] = minTemp.value();
+          if (maxTemp.has_value())
+            root["max_temp"] = maxTemp.value();
+          if (!modeCommandTopic.empty())
+            root["mode_cmd_t"] = modeCommandTopic;
+          if (modeCommandTemplate)
+            root["mode_cmd_tpl"] = modeCommandTemplate;
+          if (!modeStateTopic.empty())
+            root["mode_stat_t"] = modeStateTopic;
+          if (modeStateTemplate)
+            root["mode_stat_tpl"] = modeStateTemplate;
+          if (!modes.empty()) {
+            JsonArray opts = root["modes"].to<JsonArray>();
+            for (auto& opt : modes)
+              opts.add(opt);
+          }
+          if (initial.has_value())
+            root["init"] = initial.value();
+        }
+
+        std::string currentTemperatureTopic;
+        const char* currentTemperatureTemplate = nullptr;
+        std::string commandTopic; // on/off power commands
+        const char* payloadOn = nullptr; // default ON
+        const char* payloadOff = nullptr; // default OFF
+        std::optional<float> precision; // 0.1, 0.5 or 1.0; default per temperature unit
+        std::string powerCommandTopic;
+        const char* powerCommandTemplate = nullptr;
+        std::string temperatureCommandTopic;
+        const char* temperatureCommandTemplate = nullptr;
+        std::string temperatureStateTopic;
+        const char* temperatureStateTemplate = nullptr;
+        const char* temperatureUnit = nullptr; // C or F
+        std::optional<float> minTemp;
+        std::optional<float> maxTemp;
+        std::string modeCommandTopic; // operation mode
+        const char* modeCommandTemplate = nullptr;
+        std::string modeStateTopic;
+        const char* modeStateTemplate = nullptr;
+        std::vector<const char*> modes;
+        std::optional<float> initial; // initial target temperature on startup
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
