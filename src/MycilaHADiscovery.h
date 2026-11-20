@@ -576,6 +576,24 @@ namespace Mycila {
         void end();
 
       private:
+        // Discovery topic for a component: its configTopic override, or <discovery>/<type>/<device>/<id>/config
+        static std::string componentConfigTopic(const Component* component, const std::string& discoveryTopic, const std::string& deviceId) {
+          if (!component->configTopic.empty())
+            return component->configTopic;
+
+          std::string topic;
+          topic.reserve(discoveryTopic.length() + 1 + strlen(component->type) + 1 + deviceId.length() + 1 + component->id.length() + 7);
+          topic.append(discoveryTopic);
+          topic.append("/");
+          topic.append(component->type);
+          topic.append("/");
+          topic.append(deviceId);
+          topic.append("/");
+          topic.append(component->id);
+          topic.append("/config");
+          return topic;
+        }
+
         Device _device;
         PublisherCallback _publisher = nullptr;
         std::string _baseTopic;

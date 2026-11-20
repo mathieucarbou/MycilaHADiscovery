@@ -104,20 +104,7 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   buffer.reserve(measureJson(root));
   serializeJson(root, buffer);
 
-  std::string topic;
-  if (!component->configTopic.empty()) {
-    topic = component->configTopic;
-  } else {
-    topic.reserve(_discoveryTopic.length() + 1 + strlen(component->type) + 1 + _device.id.length() + 1 + component->id.length() + 7);
-    topic.append(_discoveryTopic);
-    topic.append("/");
-    topic.append(component->type);
-    topic.append("/");
-    topic.append(_device.id);
-    topic.append("/");
-    topic.append(component->id);
-    topic.append("/config");
-  }
+  const std::string topic = componentConfigTopic(component.get(), _discoveryTopic, _device.id);
 
   LOGD(TAG, "%s [%d b]", topic.c_str(), buffer.length());
   _publisher(topic.c_str(), buffer);
@@ -136,20 +123,7 @@ void Mycila::HA::Discovery::unpublish(std::unique_ptr<Component> component) {
   if (_device.id.empty())
     return;
 
-  std::string topic;
-  if (!component->configTopic.empty()) {
-    topic = component->configTopic;
-  } else {
-    topic.reserve(_discoveryTopic.length() + 1 + strlen(component->type) + 1 + _device.id.length() + 1 + component->id.length() + 7);
-    topic.append(_discoveryTopic);
-    topic.append("/");
-    topic.append(component->type);
-    topic.append("/");
-    topic.append(_device.id);
-    topic.append("/");
-    topic.append(component->id);
-    topic.append("/config");
-  }
+  const std::string topic = componentConfigTopic(component.get(), _discoveryTopic, _device.id);
 
   LOGD(TAG, "unpublish: %s", topic.c_str());
   _publisher(topic.c_str(), "");
