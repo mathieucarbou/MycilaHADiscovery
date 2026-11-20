@@ -647,6 +647,27 @@ namespace Mycila {
         const char* timezone = nullptr; // IANA name (e.g. Europe/Paris) used when the payload has no timezone
     };
 
+    // https://www.home-assistant.io/integrations/notify.mqtt/
+    // Home Assistant publishes the notification text to the command topic; the rendered
+    // text is available in the command template as {{ value }}. Without command_topic,
+    // the notify entity cannot send messages.
+    class Notify : public Component {
+      public:
+        Notify(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("notify", std::move(id), std::move(name), nullptr, icon, category) {}
+        virtual ~Notify() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (commandTemplate)
+            root["cmd_tpl"] = commandTemplate;
+        }
+
+        std::string commandTopic; // required for the entity to send messages
+        const char* commandTemplate = nullptr;
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
