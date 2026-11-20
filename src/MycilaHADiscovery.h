@@ -279,6 +279,10 @@ namespace Mycila {
           Component::toJson(root);
           if (valueTemplate)
             root["val_tpl"] = valueTemplate;
+          if (!powerCommandTopic.empty())
+            root["pow_cmd_t"] = powerCommandTopic;
+          if (powerCommandTemplate)
+            root["pow_cmd_tpl"] = powerCommandTemplate;
           if (payloadOn)
             root["pl_on"] = payloadOn;
           if (payloadOff)
@@ -336,7 +340,9 @@ namespace Mycila {
         }
 
         const char* valueTemplate = nullptr;
-        const char* payloadOn = nullptr;
+        std::string powerCommandTopic; // enables climate.turn_on / climate.turn_off
+        const char* powerCommandTemplate = nullptr;
+        const char* payloadOn = nullptr; // payloads for powerCommandTopic, used instead of the ON/OFF defaults
         const char* payloadOff = nullptr;
         std::string currentTemperatureTopic;
         const char* currentTemperatureTemplate = nullptr;
