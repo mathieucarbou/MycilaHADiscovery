@@ -1039,6 +1039,173 @@ namespace Mycila {
         const char* sourceType = nullptr; // gps, router, bluetooth or bluetooth_le
     };
 
+    // https://www.home-assistant.io/integrations/light.mqtt/
+    // "basic" schema only. color mode is derived from the configured topics unless
+    // colorModeStateTopic is set; hs, xy, rgb, rgbw and rgbww are mutually exclusive
+    // color styles in practical use.
+    class Light : public Component {
+      public:
+        Light(std::string id, std::string name, std::string commandTopic, const char* icon = nullptr, const Category category = Category::NONE) : Component("light", std::move(id), std::move(name), nullptr, icon, category) {
+          this->commandTopic = std::move(commandTopic);
+        }
+        virtual ~Light() = default;
+
+        void toJson(const JsonObject& root) override {
+          Component::toJson(root);
+          if (!stateTopic.empty())
+            root["stat_t"] = stateTopic;
+          if (stateValueTemplate)
+            root["stat_val_tpl"] = stateValueTemplate;
+          if (!commandTopic.empty())
+            root["cmd_t"] = commandTopic;
+          if (payloadOn)
+            root["pl_on"] = payloadOn;
+          if (payloadOff)
+            root["pl_off"] = payloadOff;
+          if (onCommandType)
+            root["on_cmd_type"] = onCommandType;
+          if (!brightnessCommandTopic.empty())
+            root["bri_cmd_t"] = brightnessCommandTopic;
+          if (brightnessCommandTemplate)
+            root["bri_cmd_tpl"] = brightnessCommandTemplate;
+          if (!brightnessStateTopic.empty())
+            root["bri_stat_t"] = brightnessStateTopic;
+          if (brightnessValueTemplate)
+            root["bri_val_tpl"] = brightnessValueTemplate;
+          if (brightnessScale.has_value())
+            root["bri_scl"] = brightnessScale.value();
+          if (!colorTempCommandTopic.empty())
+            root["clr_temp_cmd_t"] = colorTempCommandTopic;
+          if (colorTempCommandTemplate)
+            root["clr_temp_cmd_tpl"] = colorTempCommandTemplate;
+          if (!colorTempStateTopic.empty())
+            root["clr_temp_stat_t"] = colorTempStateTopic;
+          if (colorTempValueTemplate)
+            root["clr_temp_val_tpl"] = colorTempValueTemplate;
+          if (colorTempKelvin.has_value())
+            root["clr_temp_k"] = colorTempKelvin.value();
+          if (minKelvin.has_value())
+            root["min_k"] = minKelvin.value();
+          if (maxKelvin.has_value())
+            root["max_k"] = maxKelvin.value();
+          if (minMireds.has_value())
+            root["min_mirs"] = minMireds.value();
+          if (maxMireds.has_value())
+            root["max_mirs"] = maxMireds.value();
+          if (!hsCommandTopic.empty())
+            root["hs_cmd_t"] = hsCommandTopic;
+          if (hsCommandTemplate)
+            root["hs_cmd_tpl"] = hsCommandTemplate;
+          if (!hsStateTopic.empty())
+            root["hs_stat_t"] = hsStateTopic;
+          if (hsValueTemplate)
+            root["hs_val_tpl"] = hsValueTemplate;
+          if (!xyCommandTopic.empty())
+            root["xy_cmd_t"] = xyCommandTopic;
+          if (xyCommandTemplate)
+            root["xy_cmd_tpl"] = xyCommandTemplate;
+          if (!xyStateTopic.empty())
+            root["xy_stat_t"] = xyStateTopic;
+          if (xyValueTemplate)
+            root["xy_val_tpl"] = xyValueTemplate;
+          if (!rgbCommandTopic.empty())
+            root["rgb_cmd_t"] = rgbCommandTopic;
+          if (rgbCommandTemplate)
+            root["rgb_cmd_tpl"] = rgbCommandTemplate;
+          if (!rgbStateTopic.empty())
+            root["rgb_stat_t"] = rgbStateTopic;
+          if (rgbValueTemplate)
+            root["rgb_val_tpl"] = rgbValueTemplate;
+          if (!rgbwCommandTopic.empty())
+            root["rgbw_cmd_t"] = rgbwCommandTopic;
+          if (rgbwCommandTemplate)
+            root["rgbw_cmd_tpl"] = rgbwCommandTemplate;
+          if (!rgbwStateTopic.empty())
+            root["rgbw_stat_t"] = rgbwStateTopic;
+          if (rgbwValueTemplate)
+            root["rgbw_val_tpl"] = rgbwValueTemplate;
+          if (!rgbwwCommandTopic.empty())
+            root["rgbww_cmd_t"] = rgbwwCommandTopic;
+          if (rgbwwCommandTemplate)
+            root["rgbww_cmd_tpl"] = rgbwwCommandTemplate;
+          if (!rgbwwStateTopic.empty())
+            root["rgbww_stat_t"] = rgbwwStateTopic;
+          if (rgbwwValueTemplate)
+            root["rgbww_val_tpl"] = rgbwwValueTemplate;
+          if (!whiteCommandTopic.empty())
+            root["whit_cmd_t"] = whiteCommandTopic;
+          if (whiteScale.has_value())
+            root["whit_scl"] = whiteScale.value();
+          if (!colorModeStateTopic.empty())
+            root["clrm_stat_t"] = colorModeStateTopic;
+          if (colorModeValueTemplate)
+            root["clrm_val_tpl"] = colorModeValueTemplate;
+          if (!effectCommandTopic.empty())
+            root["fx_cmd_t"] = effectCommandTopic;
+          if (effectCommandTemplate)
+            root["fx_cmd_tpl"] = effectCommandTemplate;
+          if (!effectStateTopic.empty())
+            root["fx_stat_t"] = effectStateTopic;
+          if (effectValueTemplate)
+            root["fx_val_tpl"] = effectValueTemplate;
+          if (!effectList.empty()) {
+            JsonArray opts = root["fx_list"].to<JsonArray>();
+            for (auto& opt : effectList)
+              opts.add(opt);
+          }
+        }
+
+        std::string stateTopic; // reports on/off
+        const char* stateValueTemplate = nullptr;
+        std::string commandTopic; // required: on/off and, unless separate style topics exist, styles too
+        const char* payloadOn = nullptr; // default ON
+        const char* payloadOff = nullptr; // default OFF
+        const char* onCommandType = nullptr; // last (default), first or brightness
+        std::string brightnessCommandTopic;
+        const char* brightnessCommandTemplate = nullptr;
+        std::string brightnessStateTopic;
+        const char* brightnessValueTemplate = nullptr;
+        std::optional<int> brightnessScale; // default 255
+        std::string colorTempCommandTopic; // mireds, or kelvin when colorTempKelvin is true
+        const char* colorTempCommandTemplate = nullptr;
+        std::string colorTempStateTopic;
+        const char* colorTempValueTemplate = nullptr;
+        std::optional<bool> colorTempKelvin; // default false; payloads in kelvin instead of mireds
+        std::optional<int> minKelvin; // default 2000; with colorTempKelvin
+        std::optional<int> maxKelvin; // default 6535; with colorTempKelvin
+        std::optional<int> minMireds;
+        std::optional<int> maxMireds;
+        std::string hsCommandTopic; // hue 0-360, saturation 0-100
+        const char* hsCommandTemplate = nullptr;
+        std::string hsStateTopic;
+        const char* hsValueTemplate = nullptr;
+        std::string xyCommandTopic; // CIE 1931 x,y coordinates
+        const char* xyCommandTemplate = nullptr;
+        std::string xyStateTopic;
+        const char* xyValueTemplate = nullptr;
+        std::string rgbCommandTopic; // r,g,b 0-255
+        const char* rgbCommandTemplate = nullptr;
+        std::string rgbStateTopic;
+        const char* rgbValueTemplate = nullptr;
+        std::string rgbwCommandTopic; // r,g,b,w
+        const char* rgbwCommandTemplate = nullptr;
+        std::string rgbwStateTopic;
+        const char* rgbwValueTemplate = nullptr;
+        std::string rgbwwCommandTopic; // r,g,b,ww,cw
+        const char* rgbwwCommandTemplate = nullptr;
+        std::string rgbwwStateTopic;
+        const char* rgbwwValueTemplate = nullptr;
+        std::string whiteCommandTopic;
+        std::optional<int> whiteScale; // default 255
+        std::string colorModeStateTopic; // color_mode (on/off, color_temp, hs, xy, rgb, ...)
+        const char* colorModeValueTemplate = nullptr;
+        std::string effectCommandTopic;
+        const char* effectCommandTemplate = nullptr;
+        std::string effectStateTopic;
+        const char* effectValueTemplate = nullptr;
+        std::vector<const char*> effectList;
+    };
+
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
