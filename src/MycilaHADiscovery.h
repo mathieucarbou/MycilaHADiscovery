@@ -514,6 +514,8 @@ namespace Mycila {
           Component::toJson(root);
           if (!commandTopic.empty())
             root["cmd_t"] = commandTopic;
+          if (payloadInstall)
+            root["pl_inst"] = payloadInstall;
           if (!stateTopic.empty())
             root["stat_t"] = stateTopic;
           if (valueTemplate)
@@ -527,6 +529,7 @@ namespace Mycila {
         std::string commandTopic;
         std::string stateTopic;
         const char* valueTemplate = nullptr;
+        const char* payloadInstall = nullptr; // payload published to commandTopic when Home Assistant installs the update
         std::string url;
         std::string latestVersionTopic;
     };
