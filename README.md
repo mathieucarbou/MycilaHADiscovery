@@ -124,10 +124,10 @@ The [dynamic entities example](examples/DynamicEntities/DynamicEntities.ino) cre
 
 The example prints discovery topics and payloads to Serial. To use it with Home Assistant, replace the publisher callback with your MQTT transport and publish discovery messages with the retain flag set. Sensor readings are published separately on each sensor's state topic.
 
-Component constructors take `std::string` arguments by value and move them into the component; string literals convert implicitly. `nullptr` is not accepted where a `std::string` is expected: use an empty string for omitted values, and use `clear()` instead of assigning `nullptr` to an owned field. For example, removal only needs the identity:
+Component constructors take `std::string` arguments by value and move them into the component; string literals convert implicitly. `nullptr` is not accepted where a `std::string` is expected: use an empty string for omitted values, and use `clear()` instead of assigning `nullptr` to an owned field. For example, every component has an id-only constructor, so removal only needs the id:
 
 ```c++
-  haDiscovery.unpublish<Mycila::HA::Value>("firmware_filename", "");
+  haDiscovery.unpublish<Mycila::HA::Value>("firmware_filename");
 ```
 
 Usage example in YaSolR: https://github.com/mathieucarbou/YaSolR/blob/main/src/yasolr_mqtt.cpp

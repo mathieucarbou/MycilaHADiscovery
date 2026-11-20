@@ -28,10 +28,10 @@ haDiscovery.publish(makeTemperatureSensor(1, "Living room temperature"));
 
 ## Removing
 
-Removal only needs the identity — the component type and its `id`:
+Removal takes the component type and only its `id`; every component has an id-only constructor for exactly this use:
 
 ```cpp
-haDiscovery.unpublish<Mycila::HA::Gauge>("temperature_1", "");
+haDiscovery.unpublish<Mycila::HA::Gauge>("temperature_1");
 ```
 
 The [DynamicEntities example](https://github.com/mathieucarbou/MycilaHADiscovery/blob/main/examples/DynamicEntities/DynamicEntities.ino) demonstrates creation from generated strings, renaming with preserved identity and removal in a loop.

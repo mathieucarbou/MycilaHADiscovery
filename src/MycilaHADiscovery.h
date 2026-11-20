@@ -51,6 +51,9 @@ namespace Mycila {
         Component(const char* type, std::string id, std::string name, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : type(type), id(std::move(id)), name(std::move(name)), deviceClass(deviceClass), icon(icon), category(category) {}
         virtual ~Component() = default;
 
+        // Identity-only constructor for unpublish(): only the id is needed to remove an entity.
+        Component(const char* type, std::string id) : type(type), id(std::move(id)) {}
+
         virtual void toJson(const JsonObject& root) {
           root["name"] = name.empty() ? nullptr : name.c_str();
           if (!defaultEntityId.empty())
@@ -89,6 +92,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/button.mqtt/
     class Button : public Component {
       public:
+        explicit Button(std::string id) : Component("button", std::move(id)) {}
         Button(std::string id, std::string name) : Button(std::move(id), std::move(name), {}) {}
         Button(std::string id, std::string name, std::string commandTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : Component("button", std::move(id), std::move(name), deviceClass, icon, category) { this->commandTopic = std::move(commandTopic); }
         virtual ~Button() = default;
@@ -108,6 +112,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/switch.mqtt/ (switch)
     class Switch : public Component {
       public:
+        explicit Switch(std::string id) : Component("switch", std::move(id)) {}
         Switch(std::string id, std::string name) : Switch(std::move(id), std::move(name), {}, {}, nullptr, nullptr) {}
         Switch(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const char* payloadOn, const char* payloadOff, const char* icon = nullptr, const Category category = Category::NONE) : Component("switch", std::move(id), std::move(name), "switch", icon, category) {
           this->commandTopic = std::move(commandTopic);
@@ -141,6 +146,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/switch.mqtt/ (outlet)
     class Outlet : public Component {
       public:
+        explicit Outlet(std::string id) : Component("switch", std::move(id)) {}
         Outlet(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const char* payloadOn, const char* payloadOff, const char* icon = nullptr, const Category category = Category::NONE) : Component("switch", std::move(id), std::move(name), "outlet", icon, category) {
           this->commandTopic = std::move(commandTopic);
           this->stateTopic = std::move(stateTopic);
@@ -173,6 +179,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/select.mqtt/
     class Select : public Component {
       public:
+        explicit Select(std::string id) : Component("select", std::move(id)) {}
         Select(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const char* icon = nullptr, const Category category = Category::NONE, std::vector<const char*> options = {}) : Component("select", std::move(id), std::move(name), nullptr, icon, category) {
           this->commandTopic = std::move(commandTopic);
           this->stateTopic = std::move(stateTopic);
@@ -202,6 +209,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/text.mqtt/
     class Text : public Component {
       public:
+        explicit Text(std::string id) : Component("text", std::move(id)) {}
         Text(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const char* pattern = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : Component("text", std::move(id), std::move(name), nullptr, icon, category) {
           this->commandTopic = std::move(commandTopic);
           this->stateTopic = std::move(stateTopic);
@@ -230,6 +238,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/number.mqtt/
     class Number : public Component {
       public:
+        explicit Number(std::string id) : Component("number", std::move(id)) {}
         Number(std::string id, std::string name) : Number(std::move(id), std::move(name), {}, {}) {}
         Number(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const NumberMode mode = NumberMode::AUTO, const std::optional<float> min = std::nullopt, const std::optional<float> max = std::nullopt, const float step = 1, const char* icon = nullptr, const Category category = Category::NONE) : Component("number", std::move(id), std::move(name), nullptr, icon, category) {
           this->commandTopic = std::move(commandTopic);
@@ -272,6 +281,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/climate.mqtt/
     class Climate : public Component {
       public:
+        explicit Climate(std::string id) : Component("climate", std::move(id)) {}
         Climate(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("climate", std::move(id), std::move(name), nullptr, icon, category) {}
         virtual ~Climate() = default;
 
@@ -371,6 +381,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/cover.mqtt/
     class Cover : public Component {
       public:
+        explicit Cover(std::string id) : Component("cover", std::move(id)) {}
         Cover(std::string id, std::string name, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : Component("cover", std::move(id), std::move(name), deviceClass, icon, category) {}
         virtual ~Cover() = default;
 
@@ -461,6 +472,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/fan.mqtt/
     class Fan : public Component {
       public:
+        explicit Fan(std::string id) : Component("fan", std::move(id)) {}
         Fan(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("fan", std::move(id), std::move(name), nullptr, icon, category) {}
         virtual ~Fan() = default;
 
@@ -564,6 +576,7 @@ namespace Mycila {
     // State and commands are ISO 8601 dates (YYYY-MM-DD).
     class Date : public Component {
       public:
+        explicit Date(std::string id) : Component("date", std::move(id)) {}
         Date(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const char* icon = nullptr, const Category category = Category::NONE) : Component("date", std::move(id), std::move(name), nullptr, icon, category) {
           this->commandTopic = std::move(commandTopic);
           this->stateTopic = std::move(stateTopic);
@@ -592,6 +605,7 @@ namespace Mycila {
     // State and commands are ISO 8601 times (HH:MM:SS).
     class Time : public Component {
       public:
+        explicit Time(std::string id) : Component("time", std::move(id)) {}
         Time(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const char* icon = nullptr, const Category category = Category::NONE) : Component("time", std::move(id), std::move(name), nullptr, icon, category) {
           this->commandTopic = std::move(commandTopic);
           this->stateTopic = std::move(stateTopic);
@@ -620,6 +634,7 @@ namespace Mycila {
     // State and commands are ISO 8601 datetimes (YYYY-MM-DDTHH:MM:SS[±HH:MM]).
     class Datetime : public Component {
       public:
+        explicit Datetime(std::string id) : Component("datetime", std::move(id)) {}
         Datetime(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const char* icon = nullptr, const Category category = Category::NONE) : Component("datetime", std::move(id), std::move(name), nullptr, icon, category) {
           this->commandTopic = std::move(commandTopic);
           this->stateTopic = std::move(stateTopic);
@@ -653,6 +668,7 @@ namespace Mycila {
     // the notify entity cannot send messages.
     class Notify : public Component {
       public:
+        explicit Notify(std::string id) : Component("notify", std::move(id)) {}
         Notify(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("notify", std::move(id), std::move(name), nullptr, icon, category) {}
         virtual ~Notify() = default;
 
@@ -675,6 +691,7 @@ namespace Mycila {
     // Without command_topic, Home Assistant runs the siren in receive-only mode.
     class Siren : public Component {
       public:
+        explicit Siren(std::string id) : Component("siren", std::move(id)) {}
         Siren(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("siren", std::move(id), std::move(name), nullptr, icon, category) {}
         virtual ~Siren() = default;
 
@@ -728,6 +745,7 @@ namespace Mycila {
     // reportsPosition is true, numeric position values 0-100.
     class Valve : public Component {
       public:
+        explicit Valve(std::string id) : Component("valve", std::move(id)) {}
         Valve(std::string id, std::string name, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE) : Component("valve", std::move(id), std::move(name), deviceClass, icon, category) {}
         virtual ~Valve() = default;
 
@@ -782,6 +800,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/humidifier.mqtt/
     class Humidifier : public Component {
       public:
+        explicit Humidifier(std::string id) : Component("humidifier", std::move(id)) {}
         Humidifier(std::string id, std::string name, std::string commandTopic, std::string targetHumidityCommandTopic, const char* deviceClass = "humidifier", const char* icon = nullptr, const Category category = Category::NONE) : Component("humidifier", std::move(id), std::move(name), deviceClass, icon, category) {
           this->commandTopic = std::move(commandTopic);
           this->targetHumidityCommandTopic = std::move(targetHumidityCommandTopic);
@@ -869,6 +888,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/lock.mqtt/
     class Lock : public Component {
       public:
+        explicit Lock(std::string id) : Component("lock", std::move(id)) {}
         Lock(std::string id, std::string name, std::string commandTopic, const char* icon = nullptr, const Category category = Category::NONE) : Component("lock", std::move(id), std::move(name), nullptr, icon, category) {
           this->commandTopic = std::move(commandTopic);
         }
@@ -926,6 +946,7 @@ namespace Mycila {
     // Modes are a subset of: off, eco, electric, gas, heat_pump, high_demand, performance.
     class WaterHeater : public Component {
       public:
+        explicit WaterHeater(std::string id) : Component("water_heater", std::move(id)) {}
         WaterHeater(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("water_heater", std::move(id), std::move(name), nullptr, icon, category) {}
         virtual ~WaterHeater() = default;
 
@@ -1006,6 +1027,7 @@ namespace Mycila {
     // jsonAttributesTopic publishes GPS data, stateTopic can be omitted.
     class DeviceTracker : public Component {
       public:
+        explicit DeviceTracker(std::string id) : Component("device_tracker", std::move(id)) {}
         DeviceTracker(std::string id, std::string name, const char* icon = nullptr, const Category category = Category::NONE) : Component("device_tracker", std::move(id), std::move(name), nullptr, icon, category) {}
         virtual ~DeviceTracker() = default;
 
@@ -1045,6 +1067,7 @@ namespace Mycila {
     // color styles in practical use.
     class Light : public Component {
       public:
+        explicit Light(std::string id) : Component("light", std::move(id)) {}
         Light(std::string id, std::string name, std::string commandTopic, const char* icon = nullptr, const Category category = Category::NONE) : Component("light", std::move(id), std::move(name), nullptr, icon, category) {
           this->commandTopic = std::move(commandTopic);
         }
@@ -1209,6 +1232,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/binary_sensor.mqtt/
     class State : public Component {
       public:
+        explicit State(std::string id) : Component("binary_sensor", std::move(id)) {}
         State(std::string id, std::string name) : State(std::move(id), std::move(name), {}, nullptr, nullptr) {}
         State(std::string id, std::string name, std::string stateTopic, const char* payloadOn, const char* payloadOff, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE)
             : Component("binary_sensor", std::move(id), std::move(name), deviceClass, icon, category) {
@@ -1242,6 +1266,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/sensor.mqtt/
     class Sensor : public Component {
       public:
+        explicit Sensor(std::string id) : Component("sensor", std::move(id)) {}
         Sensor(std::string id, std::string name, std::string stateTopic, const StateClass stateClass = StateClass::NONE, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE)
             : Component("sensor", std::move(id), std::move(name), deviceClass, icon, category) {
           this->unit = unit;
@@ -1278,6 +1303,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/sensor.mqtt/ (measurement)
     class Gauge : public Sensor {
       public:
+        explicit Gauge(std::string id) : Sensor(std::move(id)) {}
         Gauge(std::string id, std::string name) : Gauge(std::move(id), std::move(name), {}) {}
         Gauge(std::string id, std::string name, std::string stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
             : Sensor(std::move(id), std::move(name), std::move(stateTopic), StateClass::GAUGE, deviceClass, icon, unit, category) {
@@ -1289,6 +1315,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/sensor.mqtt/ (total_increasing)
     class Counter : public Sensor {
       public:
+        explicit Counter(std::string id) : Sensor(std::move(id)) {}
         Counter(std::string id, std::string name) : Counter(std::move(id), std::move(name), {}) {}
         Counter(std::string id, std::string name, std::string stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
             : Sensor(std::move(id), std::move(name), std::move(stateTopic), StateClass::COUNTER, deviceClass, icon, unit, category) {
@@ -1300,6 +1327,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/sensor.mqtt/ (total)
     class Total : public Sensor {
       public:
+        explicit Total(std::string id) : Sensor(std::move(id)) {}
         Total(std::string id, std::string name, std::string stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const char* unit = nullptr, const Category category = Category::NONE)
             : Sensor(std::move(id), std::move(name), std::move(stateTopic), StateClass::TOTAL, deviceClass, icon, unit, category) {}
         virtual ~Total() = default;
@@ -1308,6 +1336,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/sensor.mqtt/ (no state class)
     class Value : public Sensor {
       public:
+        explicit Value(std::string id) : Sensor(std::move(id)) {}
         Value(std::string id, std::string name) : Value(std::move(id), std::move(name), {}) {}
         Value(std::string id, std::string name, std::string stateTopic, const char* deviceClass = nullptr, const char* icon = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
             : Sensor(std::move(id), std::move(name), std::move(stateTopic), StateClass::NONE, deviceClass, icon, nullptr, category) {
@@ -1319,6 +1348,7 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/sensor.mqtt/ (enum: closed set of possible values)
     class Enum : public Sensor {
       public:
+        explicit Enum(std::string id) : Sensor(std::move(id)) {}
         Enum(std::string id, std::string name, std::string stateTopic, std::vector<const char*> options, const char* icon = nullptr, const Category category = Category::NONE, const char* valueTemplate = nullptr)
             : Sensor(std::move(id), std::move(name), std::move(stateTopic), StateClass::NONE, "enum", icon, nullptr, category) {
           this->valueTemplate = valueTemplate;
@@ -1340,6 +1370,7 @@ namespace Mycila {
     class Update : public Component {
       public:
         // stateTopic is required by Home Assistant. Pass "" for url or latestVersionTopic when not used.
+        explicit Update(std::string id) : Component("update", std::move(id)) {}
         Update(std::string id, std::string name, std::string url, std::string stateTopic, std::string latestVersionTopic = {}, const char* deviceClass = "firmware", const char* icon = nullptr, const Category category = Category::NONE)
             : Component("update", std::move(id), std::move(name), deviceClass, icon, category) {
           this->stateTopic = std::move(stateTopic);

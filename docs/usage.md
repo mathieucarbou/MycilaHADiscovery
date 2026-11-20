@@ -57,7 +57,7 @@ The component is allocated on the heap, serialized, then automatically freed dur
 `unpublish()` publishes an empty payload to the component discovery topic, which removes the entity from Home Assistant. Only the identity is needed:
 
 ```cpp
-haDiscovery.unpublish<Mycila::HA::Value>("firmware_filename", "");
+haDiscovery.unpublish<Mycila::HA::Value>("firmware_filename");
 ```
 
 !!! warning "configTopic overrides must match on unpublish"

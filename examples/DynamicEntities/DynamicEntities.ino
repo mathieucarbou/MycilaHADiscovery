@@ -65,7 +65,7 @@ void loop() {
 
       case 2:
         Serial.println("Remove sensor 2 using only its identity");
-        haDiscovery.unpublish<HA::Gauge>("temperature_" + std::to_string(2), "");
+        haDiscovery.unpublish<HA::Gauge>("temperature_" + std::to_string(2));
         break;
 
       case 3:

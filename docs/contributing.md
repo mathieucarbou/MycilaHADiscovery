@@ -7,6 +7,7 @@ If the behavior of this library does not fit your needs, or you want to improve 
 1. Check the component page on [home-assistant.io](https://www.home-assistant.io/integrations/mqtt/): the doc page is the source of truth for which options are `Required` vs `Optional`.
 2. Add or update the component class in `src/MycilaHADiscovery.h`, following the existing conventions:
    - Required topics are constructor arguments; optional topics are `std::string` fields
+   - Add an id-only constructor (`X(std::string id)`) so entities can be removed with `unpublish<X>(id)` alone
    - Payloads and templates are borrowed `const char*`
    - Values whose omission lets Home Assistant apply its default are `std::optional` and are not emitted when unset
 3. Validate every JSON key you emit against [Home Assistant's abbreviation list](https://www.home-assistant.io/integrations/mqtt/#supported-abbreviations-in-mqtt-discovery-messages).
