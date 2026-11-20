@@ -231,7 +231,7 @@ namespace Mycila {
     class Number : public Component {
       public:
         Number(std::string id, std::string name) : Number(std::move(id), std::move(name), {}, {}) {}
-        Number(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const NumberMode mode = NumberMode::AUTO, const float min = 0, const float max = 100, const float step = 1, const char* icon = nullptr, const Category category = Category::NONE) : Component("number", std::move(id), std::move(name), nullptr, icon, category) {
+        Number(std::string id, std::string name, std::string commandTopic, std::string stateTopic, const NumberMode mode = NumberMode::AUTO, const std::optional<float> min = std::nullopt, const std::optional<float> max = std::nullopt, const float step = 1, const char* icon = nullptr, const Category category = Category::NONE) : Component("number", std::move(id), std::move(name), nullptr, icon, category) {
           this->commandTopic = std::move(commandTopic);
           this->stateTopic = std::move(stateTopic);
           this->mode = mode;
@@ -263,10 +263,10 @@ namespace Mycila {
         std::string stateTopic;
         const char* unit = nullptr;
         const char* valueTemplate = nullptr;
-        NumberMode mode = NumberMode::AUTO;
-        std::optional<float> min = 0;
-        std::optional<float> max = 100;
-        float step = 1;
+        NumberMode mode = NumberMode::AUTO; // always emitted; NumberMode::AUTO is the Home Assistant default
+        std::optional<float> min; // unset preserves the Home Assistant default (0)
+        std::optional<float> max; // unset preserves the Home Assistant default (100)
+        float step = 1; // always emitted; 1 is the Home Assistant default
     };
 
     // https://www.home-assistant.io/integrations/climate.mqtt/
