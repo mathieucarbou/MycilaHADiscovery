@@ -24,6 +24,31 @@ extern Mycila::Logger logger;
 
 #define TAG "HA"
 
+namespace Mycila {
+  namespace HA {
+    namespace {
+      // ASCII subset of Home Assistant's slugify (homeassistant.util.slugify, separator '_'):
+      // lowercase alphanumerics kept, everything else replaced by '_' (HA also folds unicode
+      // and strips leading/trailing separators; entity ids only accept [a-z0-9_]).
+      std::string slug(const std::string& text) {
+        std::string out;
+        out.reserve(text.length());
+        for (char c : text) {
+          if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
+            out.push_back(c);
+          else if (c >= 'A' && c <= 'Z')
+            out.push_back(c + ('a' - 'A'));
+          else
+            out.push_back('_');
+        }
+        return out;
+      }
+    } // namespace
+  } // namespace HA
+} // namespace Mycila
+
+// default_entity_id must stay "<domain>.<object_id>": Home Assistant partitions on the first
+// dot and slugifies only the object_id part (entity.py), so each side is slugged separately.
 void Mycila::HA::Discovery::begin(Device device, std::string baseTopic, const size_t bufferSise, PublisherCallback publisher) {
   _device = std::move(device);
   _baseTopic = std::move(baseTopic);
@@ -55,7 +80,7 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   root["uniq_id"] = component->uniqueId;
 
   if (component->defaultEntityId.empty())
-    component->defaultEntityId = std::string(component->type) + "." + component->uniqueId;
+    component->defaultEntityId = slug(component->type) + "." + slug(component->uniqueId);
 
   // device
   JsonObject device = root["dev"].to<JsonObject>();
