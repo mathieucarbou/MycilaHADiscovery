@@ -33,7 +33,7 @@ jobs:
       - name: Install mkdocs-material mkdoxy
         run: pip install mkdocs-material mkdoxy
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Build with MkDocs
         run: mkdocs build --site-dir _site
       - name: Upload artifact
