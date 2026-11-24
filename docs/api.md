@@ -33,14 +33,18 @@ Mycila::HA
 | `begin(Device, std::string baseTopic, PublisherCallback)` | Store device, base topic and publisher callback (1024-byte JSON pool by default) |
 | `begin(Device, std::string baseTopic, const size_t bufferSize, PublisherCallback)` | Same, with explicit JSON pool size |
 | `setDiscoveryTopic(std::string)` | Change the discovery prefix (default `homeassistant`) |
+| `const std::string& getDiscoveryTopic() const` | Return the current discovery prefix by const reference |
 | `setWillTopic(std::string)` | Global availability topic (LWT) |
-| `publish(std::unique_ptr<Component>)` | Allocate, serialize and publish the component; frees it when done |
-| `publish<T>(Args&&...)` | Convenience overload: constructs `T` in place with `make_unique` |
-| `unpublish(std::unique_ptr<Component>)` | Publish an empty payload to the component discovery topic |
-| `unpublish<T>(Args&&...)` | Convenience overload |
+| `const std::string& getWillTopic() const` | Return the current global availability topic (LWT) by const reference |
+| `bool publish(std::unique_ptr<Component>)` | Allocate, serialize and publish the component; frees it even on failure |
+| `bool publish<T>(Args&&...)` | Convenience overload: constructs `T` in place with `make_unique` |
+| `bool unpublish(std::unique_ptr<Component>)` | Publish an empty payload to the component discovery topic; frees the component |
+| `bool unpublish<T>(Args&&...)` | Convenience overload |
 | `end()` | Clears the publisher callback |
 
-`PublisherCallback` is `std::function<void(const char* topic, const std::string& payload)>`.
+`PublisherCallback` is `std::function<bool(const char* topic, const std::string& payload)>`.
+
+`publish()` and `unpublish()` return `false` when their guards or serialization fail; otherwise they return the callback's result. The callback is synchronous and should report whether the transport accepted the message, not whether the broker or Home Assistant has processed it. An asynchronous transport must copy the topic and payload before returning. Components are consumed even on failure; retry requires a new component and is the caller's responsibility.
 
 ## Component base fields (all components)
 

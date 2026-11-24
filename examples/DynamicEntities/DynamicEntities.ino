@@ -37,6 +37,9 @@ void setup() {
                       // An empty retained payload removes the discovery config.
                       Serial.println(topic);
                       Serial.println(payload.empty() ? "(remove retained config)" : payload.c_str());
+
+                      // Serial-only demo; return your MQTT transport's result when replacing this output.
+                      return true;
                     });
 
   Serial.println("Create sensor 1");

@@ -43,10 +43,13 @@ Setup:
                       .url = "http://" + WiFi.localIP().toString(),
                     },
                     "/my-app", // base topic
-                    [](const char* topic, const char* payload) {
-                      // Here, you would call your mqttClient.publish() code
+                    [](const char* topic, const std::string& payload) {
+                      // Return whether your MQTT transport accepted the retained message.
+                      return mqttClient.publish(topic, payload.c_str(), true);
                     });
 ```
+
+The publisher callback returns `bool`. `publish()` and `unpublish()` return this transport result, or `false` if the discovery message cannot be prepared. With an asynchronous MQTT client, `true` means accepted for sending, not confirmed delivery to the broker or Home Assistant.
 
 Then query state:
 

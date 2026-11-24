@@ -21,7 +21,8 @@ void setup() {
                     },
                     "/my-app", // base topic
                     [](const char* topic, const std::string& payload) {
-                      // here, call your mqttClient.publish() code with retain=true
+                      // Return whether your MQTT transport accepted the retained message.
+                      return mqttClient.publish(topic, payload.c_str(), true);
                     });
 }
 ```
@@ -51,6 +52,12 @@ The `~` in component topics is replaced by Home Assistant with the base topic.
    ```
 
 The component is allocated on the heap, serialized, then automatically freed during `publish()`. Publication is synchronous: strings owned by the component can be freed once `publish()` returns.
+
+Both forms of `publish()` and `unpublish()` return `bool`: the publisher callback's result, or `false` if the discovery message cannot be prepared. Return whether your MQTT transport accepted the message; an asynchronous client's successful enqueue does not confirm delivery to the broker or processing by Home Assistant. The callback runs before the method returns, so an asynchronous transport must copy the topic and payload before returning.
+
+Existing publisher callbacks returning `void` must be updated to return the transport result.
+
+The component is consumed and freed even when the method returns `false`. To retry, construct a new component. The library does not retry automatically.
 
 ## Removing Components
 

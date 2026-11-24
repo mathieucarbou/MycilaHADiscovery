@@ -1403,16 +1403,18 @@ namespace Mycila {
         std::string latestVersionTopic;
     };
 
-    typedef std::function<void(const char* topic, const std::string& payload)> PublisherCallback;
+    typedef std::function<bool(const char* topic, const std::string& payload)> PublisherCallback;
 
     // https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
     class Discovery {
       public:
         // OPTIONAL: HA discovery topic, default to MYCILA_HA_DISCOVERY_TOPIC
         void setDiscoveryTopic(std::string discoveryTopic) { _discoveryTopic = std::move(discoveryTopic); };
+        const std::string& getDiscoveryTopic() const { return _discoveryTopic; };
 
         // OPTIONAL: set will topic (absolute), default to empty string, which is disabled
         void setWillTopic(std::string willTopic) { _willTopic = std::move(willTopic); };
+        const std::string& getWillTopic() const { return _willTopic; };
 
         // called each time before publishing components
         // will prepare the buffers
@@ -1421,11 +1423,13 @@ namespace Mycila {
 
         // Publish a component, transferring ownership.
         // The component is allocated on the heap, serialized, then automatically freed.
-        void publish(std::unique_ptr<Component> component);
+        // Returns the publisher result, or false if the config cannot be published.
+        bool publish(std::unique_ptr<Component> component);
 
         // Unpublish (remove) a component, transferring ownership.
         // The component is allocated on the heap, its discovery topic is cleared, then automatically freed.
-        void unpublish(std::unique_ptr<Component> component);
+        // Returns the publisher result, or false if the config cannot be removed.
+        bool unpublish(std::unique_ptr<Component> component);
 
         // Convenience overload: construct the component in-place on the heap.
         // Equivalent to publish(std::make_unique<T>(args...)).
@@ -1433,15 +1437,15 @@ namespace Mycila {
         // Example:
         //   haDiscovery.publish<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart");
         template<typename T, typename... Args>
-        void publish(Args&&... args) {
-          publish(std::make_unique<T>(std::forward<Args>(args)...));
+        bool publish(Args&&... args) {
+          return publish(std::make_unique<T>(std::forward<Args>(args)...));
         }
 
         // Convenience overload: construct the component in-place on the heap.
         // Equivalent to unpublish(std::make_unique<T>(args...)).
         template<typename T, typename... Args>
-        void unpublish(Args&&... args) {
-          unpublish(std::make_unique<T>(std::forward<Args>(args)...));
+        bool unpublish(Args&&... args) {
+          return unpublish(std::make_unique<T>(std::forward<Args>(args)...));
         }
 
         // called after all components are published

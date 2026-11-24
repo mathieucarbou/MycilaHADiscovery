@@ -25,6 +25,9 @@ void setup() {
                       // Here, you would call your mqttClient.publish() code
                       Serial.println(topic);
                       Serial.println(payload.c_str());
+
+                      // Serial-only demo; return your MQTT transport's result when replacing this output.
+                      return true;
                     });
 
   // some diagnostic info
