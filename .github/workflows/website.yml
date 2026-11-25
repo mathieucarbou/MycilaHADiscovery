@@ -20,6 +20,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.repository == 'mathieucarbou/MycilaHADiscovery' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -40,6 +41,7 @@ jobs:
         uses: actions/upload-pages-artifact@v5
 
   deploy:
+    if: github.repository == 'mathieucarbou/MycilaHADiscovery' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
