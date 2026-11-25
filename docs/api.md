@@ -41,7 +41,6 @@ Mycila::HA
 | `err_t publish<T>(Args&&...)` | Convenience overload: constructs `T` in place with `make_unique` |
 | `err_t unpublish(std::unique_ptr<Component>)` | Publish an empty payload to the component discovery topic; frees the component |
 | `err_t unpublish<T>(Args&&...)` | Convenience overload |
-| `end()` | Clears the publisher callback |
 
 `PublisherCallback` is `std::function<err_t(const char* topic, const std::string& payload)>` where `err_t` is `Mycila::HA::Error`, a `uint8_t` enum class.
 

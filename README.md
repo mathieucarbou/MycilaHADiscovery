@@ -87,8 +87,6 @@ Then query state:
   relay1Commute->payloadAvailable = "true";
   relay1Commute->payloadNotAvailable = "false";
   haDiscovery.publish(std::move(relay1Commute));
-
-  haDiscovery.end();
 ```
 
 ### API overview

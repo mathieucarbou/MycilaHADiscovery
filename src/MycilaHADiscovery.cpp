@@ -133,7 +133,3 @@ Mycila::HA::err_t Mycila::HA::Discovery::unpublish(std::unique_ptr<Component> co
   ESP_LOGD(TAG, "unpublish: %s", topic.c_str());
   return _publisher(topic.c_str(), "");
 }
-
-void Mycila::HA::Discovery::end() {
-  _publisher = nullptr;
-}

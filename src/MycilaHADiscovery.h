@@ -1475,9 +1475,6 @@ namespace Mycila {
           return unpublish(std::make_unique<T>(std::forward<Args>(args)...));
         }
 
-        // called after all components are published
-        void end();
-
       private:
         // Discovery topic for a component: its configTopic override, or <discovery>/<type>/<device>/<id>/config
         static std::string componentConfigTopic(const Component* component, const std::string& discoveryTopic, const std::string& deviceId) {
