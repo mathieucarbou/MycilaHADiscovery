@@ -31,21 +31,22 @@ Simple and efficient Home Assistant Discovery library for Arduino / ESP32
 Setup:
 
 ```c++
-  haDiscovery.setWillTopic("~/status");
+  // constructor takes the Device, base topic and a callback to publish messages
+  Mycila::HA::Discovery haDiscovery(
+    {
+      .id = "my-app-1234",
+      .name = "My Application Name",
+      .version = "1.0.1",
+      .model = "OSS",
+      .manufacturer = "Mathieu Carbou",
+      .url = "http://" + WiFi.localIP().toString(),
+    },
+    "/my-app", // base topic
+    [](const char* topic, const char* payload) {
+      // Here, you would call your mqttClient.publish() code
+    });
 
-  // begin takes the Device, base topic and a callback to publish messages
-  haDiscovery.begin({
-                      .id = "my-app-1234",
-                      .name = "My Application Name",
-                      .version = "1.0.1",
-                      .model = "OSS",
-                      .manufacturer = "Mathieu Carbou",
-                      .url = "http://" + WiFi.localIP().toString(),
-                    },
-                    "/my-app", // base topic
-                    [](const char* topic, const char* payload) {
-                      // Here, you would call your mqttClient.publish() code
-                    });
+  haDiscovery.setWillTopic("~/status");
 ```
 
 Then query state:

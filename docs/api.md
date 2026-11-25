@@ -30,8 +30,7 @@ Mycila::HA
 
 | Method | Description |
 | :-- | :-- |
-| `begin(Device, std::string baseTopic, PublisherCallback)` | Store device, base topic and publisher callback (1024-byte JSON pool by default) |
-| `begin(Device, std::string baseTopic, const size_t bufferSize, PublisherCallback)` | Same, with explicit JSON pool size |
+| `Discovery(Device, std::string baseTopic, PublisherCallback)` | Store device, base topic and publisher callback |
 | `setDiscoveryTopic(std::string)` | Change the discovery prefix (default `homeassistant`) |
 | `setWillTopic(std::string)` | Global availability topic (LWT) |
 | `publish(std::unique_ptr<Component>)` | Allocate, serialize and publish the component; frees it when done |

@@ -5,24 +5,22 @@
 ```cpp
 #include <MycilaHADiscovery.h>
 
-Mycila::HA::Discovery haDiscovery;
+Mycila::HA::Discovery haDiscovery(
+  {
+    .id = "my-app-1234",
+    .name = "My Application Name",
+    .version = "1.0.1",
+    .model = "OSS",
+    .manufacturer = "Mathieu Carbou",
+    .url = "http://192.168.1.12",
+  },
+  "/my-app", // base topic
+  [](const char* topic, const std::string& payload) {
+    // here, call your mqttClient.publish() code with retain=true
+  });
 
 void setup() {
   haDiscovery.setWillTopic("~/status");
-
-  // begin takes the Device, the base topic and a callback to publish messages
-  haDiscovery.begin({
-                      .id = "my-app-1234",
-                      .name = "My Application Name",
-                      .version = "1.0.1",
-                      .model = "OSS",
-                      .manufacturer = "Mathieu Carbou",
-                      .url = "http://192.168.1.12",
-                    },
-                    "/my-app", // base topic
-                    [](const char* topic, const std::string& payload) {
-                      // here, call your mqttClient.publish() code with retain=true
-                    });
 }
 ```
 

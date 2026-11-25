@@ -13,8 +13,8 @@
 #include <utility>
 #include <vector>
 
-#define MYCILA_HA_VERSION          "8.0.0"
-#define MYCILA_HA_VERSION_MAJOR    8
+#define MYCILA_HA_VERSION          "9.0.0"
+#define MYCILA_HA_VERSION_MAJOR    9
 #define MYCILA_HA_VERSION_MINOR    0
 #define MYCILA_HA_VERSION_REVISION 0
 
@@ -1408,16 +1408,19 @@ namespace Mycila {
     // https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
     class Discovery {
       public:
+        explicit Discovery(
+          Device device,
+          std::string baseTopic,
+          PublisherCallback publisher) :
+          _device(std::move(device)),
+          _publisher(std::move(publisher)),
+          _baseTopic(std::move(baseTopic)) {}
+
         // OPTIONAL: HA discovery topic, default to MYCILA_HA_DISCOVERY_TOPIC
         void setDiscoveryTopic(std::string discoveryTopic) { _discoveryTopic = std::move(discoveryTopic); };
 
         // OPTIONAL: set will topic (absolute), default to empty string, which is disabled
         void setWillTopic(std::string willTopic) { _willTopic = std::move(willTopic); };
-
-        // called each time before publishing components
-        // will prepare the buffers
-        void begin(Device device, std::string baseTopic, PublisherCallback publisher) { begin(device, baseTopic, 1024, std::move(publisher)); }
-        void begin(Device device, std::string baseTopic, const size_t bufferSise, PublisherCallback publisher);
 
         // Publish a component, transferring ownership.
         // The component is allocated on the heap, serialized, then automatically freed.
@@ -1445,7 +1448,6 @@ namespace Mycila {
         }
 
         // called after all components are published
-        // will clear the buffers
         void end();
 
       private:

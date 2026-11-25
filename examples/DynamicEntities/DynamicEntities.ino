@@ -8,7 +8,22 @@
 
 namespace HA = Mycila::HA;
 
-HA::Discovery haDiscovery;
+HA::Discovery haDiscovery(
+  {
+    .id = "dynamic-demo",
+    .name = "Dynamic Discovery Demo",
+    .version = "1.0.0",
+    .model = "ESP32",
+    .manufacturer = "Example",
+    .url = "",
+  },
+  "dynamic-demo", // base topic
+  [](const char* topic, const std::string& payload) {
+    // Replace this output with an MQTT publish using retain=true.
+    // An empty retained payload removes the discovery config.
+    Serial.println(topic);
+    Serial.println(payload.empty() ? "(remove retained config)" : payload.c_str());
+  });
 
 // The component owns these generated strings after this function returns.
 static std::unique_ptr<HA::Gauge> makeTemperatureSensor(unsigned channel, std::string name) {
@@ -22,22 +37,6 @@ static std::unique_ptr<HA::Gauge> makeTemperatureSensor(unsigned channel, std::s
 
 void setup() {
   Serial.begin(115200);
-
-  haDiscovery.begin({
-                      .id = "dynamic-demo",
-                      .name = "Dynamic Discovery Demo",
-                      .version = "1.0.0",
-                      .model = "ESP32",
-                      .manufacturer = "Example",
-                      .url = "",
-                    },
-                    "dynamic-demo",
-                    [](const char* topic, const std::string& payload) {
-                      // Replace this output with an MQTT publish using retain=true.
-                      // An empty retained payload removes the discovery config.
-                      Serial.println(topic);
-                      Serial.println(payload.empty() ? "(remove retained config)" : payload.c_str());
-                    });
 
   Serial.println("Create sensor 1");
   // Publication happens after the factory's local strings have gone out of scope.

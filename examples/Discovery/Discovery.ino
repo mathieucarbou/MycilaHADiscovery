@@ -3,29 +3,28 @@
 #include <HardwareSerial.h>
 #include <WiFi.h>
 
-Mycila::HA::Discovery haDiscovery;
-
 void setup() {
   Serial.begin(115200);
   while (!Serial)
     continue;
 
-  haDiscovery.setWillTopic("~/status");
+  Mycila::HA::Discovery haDiscovery(
+    {
+      .id = "my-app-1234",
+      .name = "My Application Name",
+      .version = "1.0.1",
+      .model = "OSS",
+      .manufacturer = "Mathieu Carbou",
+      .url = std::string("http://") + WiFi.localIP().toString().c_str(),
+    },
+    "/my-app", // base topic
+    [](const char* topic, const std::string& payload) {
+      // Here, you would call your mqttClient.publish() code
+      Serial.println(topic);
+      Serial.println(payload.c_str());
+    });
 
-  haDiscovery.begin({
-                      .id = "my-app-1234",
-                      .name = "My Application Name",
-                      .version = "1.0.1",
-                      .model = "OSS",
-                      .manufacturer = "Mathieu Carbou",
-                      .url = std::string("http://") + WiFi.localIP().toString().c_str(),
-                    },
-                    "/my-app", // base topic
-                    [](const char* topic, const std::string& payload) {
-                      // Here, you would call your mqttClient.publish() code
-                      Serial.println(topic);
-                      Serial.println(payload.c_str());
-                    });
+  haDiscovery.setWillTopic("~/status");
 
   // some diagnostic info
   auto restart = std::make_unique<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart");

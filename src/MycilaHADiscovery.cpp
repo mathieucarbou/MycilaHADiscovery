@@ -33,14 +33,6 @@ namespace Mycila {
   } // namespace HA
 } // namespace Mycila
 
-// default_entity_id must stay "<domain>.<object_id>": Home Assistant partitions on the first
-// dot and slugifies only the object_id part (entity.py), so each side is slugged separately.
-void Mycila::HA::Discovery::begin(Device device, std::string baseTopic, const size_t bufferSise, PublisherCallback publisher) {
-  _device = std::move(device);
-  _baseTopic = std::move(baseTopic);
-  _publisher = std::move(publisher);
-}
-
 void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   if (_discoveryTopic.empty())
     return;
@@ -65,6 +57,8 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
     component->uniqueId = _device.id + "_" + component->id;
   root["uniq_id"] = component->uniqueId;
 
+  // default_entity_id must stay "<domain>.<object_id>": Home Assistant partitions on the first
+  // dot and slugifies only the object_id part (entity.py), so each side is slugged separately.
   if (component->defaultEntityId.empty())
     component->defaultEntityId = slug(component->type) + "." + slug(component->uniqueId);
 
