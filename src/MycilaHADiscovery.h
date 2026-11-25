@@ -6,6 +6,7 @@
 
 #include <ArduinoJson.h>
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -1403,7 +1404,25 @@ namespace Mycila {
         std::string latestVersionTopic;
     };
 
-    typedef std::function<void(const char* topic, const std::string& payload)> PublisherCallback;
+    // Error codes returned by Discovery::publish() and Discovery::unpublish().
+    // Codes below Error::ERR_MQTT_PUBLISHER (32) are reserved by the library; codes from
+    // Error::ERR_MQTT_PUBLISHER on are free for applications and can be returned by the
+    // publisher callback to propagate transport-specific errors to the caller.
+    enum class Error : uint8_t {
+      SUCCESS = 0,          // published / unpublished
+      NO_DISCOVERY_TOPIC,   // discovery topic is empty
+      NO_BASE_TOPIC,        // base topic is empty
+      NO_PUBLISHER,         // no publisher callback
+      NO_DEVICE_ID,         // device id is empty
+      OUT_OF_MEMORY,        // not enough memory to serialize the config
+
+      // first code usable by applications and the publisher callback
+      ERR_MQTT_PUBLISHER = 32
+    };
+
+    typedef Error err_t;
+
+    typedef std::function<err_t(const char* topic, const std::string& payload)> PublisherCallback;
 
     // https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery
     class Discovery {
@@ -1416,19 +1435,28 @@ namespace Mycila {
           _publisher(std::move(publisher)),
           _baseTopic(std::move(baseTopic)) {}
 
+        const Device& getDevice() const { return _device; }
+        const std::string& getBaseTopic() const { return _baseTopic; }
+
         // OPTIONAL: HA discovery topic, default to MYCILA_HA_DISCOVERY_TOPIC
         void setDiscoveryTopic(std::string discoveryTopic) { _discoveryTopic = std::move(discoveryTopic); };
+        const std::string& getDiscoveryTopic() const { return _discoveryTopic; }
 
         // OPTIONAL: set will topic (absolute), default to empty string, which is disabled
         void setWillTopic(std::string willTopic) { _willTopic = std::move(willTopic); };
+        const std::string& getWillTopic() const { return _willTopic; }
 
         // Publish a component, transferring ownership.
         // The component is allocated on the heap, serialized, then automatically freed.
-        void publish(std::unique_ptr<Component> component);
+        // Returns Error::SUCCESS, a library Error code, or any code returned by the
+        // publisher callback.
+        err_t publish(std::unique_ptr<Component> component);
 
         // Unpublish (remove) a component, transferring ownership.
         // The component is allocated on the heap, its discovery topic is cleared, then automatically freed.
-        void unpublish(std::unique_ptr<Component> component);
+        // Returns Error::SUCCESS, a library Error code, or any code returned by the
+        // publisher callback.
+        err_t unpublish(std::unique_ptr<Component> component);
 
         // Convenience overload: construct the component in-place on the heap.
         // Equivalent to publish(std::make_unique<T>(args...)).
@@ -1436,15 +1464,15 @@ namespace Mycila {
         // Example:
         //   haDiscovery.publish<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart");
         template<typename T, typename... Args>
-        void publish(Args&&... args) {
-          publish(std::make_unique<T>(std::forward<Args>(args)...));
+        err_t publish(Args&&... args) {
+          return publish(std::make_unique<T>(std::forward<Args>(args)...));
         }
 
         // Convenience overload: construct the component in-place on the heap.
         // Equivalent to unpublish(std::make_unique<T>(args...)).
         template<typename T, typename... Args>
-        void unpublish(Args&&... args) {
-          unpublish(std::make_unique<T>(std::forward<Args>(args)...));
+        err_t unpublish(Args&&... args) {
+          return unpublish(std::make_unique<T>(std::forward<Args>(args)...));
         }
 
         // called after all components are published

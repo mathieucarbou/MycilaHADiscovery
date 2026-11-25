@@ -18,11 +18,14 @@ HA::Discovery haDiscovery(
     .url = "",
   },
   "dynamic-demo", // base topic
-  [](const char* topic, const std::string& payload) {
+  [](const char* topic, const std::string& payload) -> HA::err_t {
     // Replace this output with an MQTT publish using retain=true.
     // An empty retained payload removes the discovery config.
     Serial.println(topic);
     Serial.println(payload.empty() ? "(remove retained config)" : payload.c_str());
+
+    // Serial-only demo; return your MQTT transport's error code from here.
+    return HA::Error::SUCCESS;
   });
 
 // The component owns these generated strings after this function returns.

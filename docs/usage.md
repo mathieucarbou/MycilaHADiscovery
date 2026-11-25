@@ -15,8 +15,13 @@ Mycila::HA::Discovery haDiscovery(
     .url = "http://192.168.1.12",
   },
   "/my-app", // base topic
-  [](const char* topic, const std::string& payload) {
-    // here, call your mqttClient.publish() code with retain=true
+  [](const char* topic, const std::string& payload) -> Mycila::HA::err_t {
+    // here, call your mqttClient.publish() code with retain=true,
+    // and return an error code: Mycila::HA::Error::SUCCESS when the transport
+    // accepted the message, or any code >= Mycila::HA::Error::ERR_MQTT_PUBLISHER on failure
+    return mqttClient.publish(topic, payload.c_str(), true)
+             ? Mycila::HA::Error::SUCCESS
+             : Mycila::HA::err_t(32); // custom transport error
   });
 
 void setup() {
@@ -49,6 +54,19 @@ The `~` in component topics is replaced by Home Assistant with the base topic.
    ```
 
 The component is allocated on the heap, serialized, then automatically freed during `publish()`. Publication is synchronous: strings owned by the component can be freed once `publish()` returns.
+
+`publish()` and `unpublish()` return a `Mycila::HA::err_t` code: `Error::SUCCESS` on success, a library code when the config cannot be prepared, or the value returned by your publisher callback. See the [API reference](api.md) for the error list. Codes from `Error::ERR_MQTT_PUBLISHER` (32) on are free for applications: return them from your callback to propagate transport-specific errors.
+
+```cpp
+// remove an update from the pending queue only on success;
+// on failure, decide how to retry based on the code
+Mycila::HA::err_t err = haDiscovery.publish<Mycila::HA::Button>("restart", "Restart", "~/system/restart", "restart");
+if (err != Mycila::HA::Error::SUCCESS) {
+  // err == Mycila::HA::Error::NO_PUBLISHER, OUT_OF_MEMORY, or a custom transport code...
+}
+```
+
+The component is consumed and freed even when publication fails. To retry, construct a new component. The library does not retry automatically.
 
 ## Removing Components
 

@@ -18,10 +18,13 @@ void setup() {
       .url = std::string("http://") + WiFi.localIP().toString().c_str(),
     },
     "/my-app", // base topic
-    [](const char* topic, const std::string& payload) {
+    [](const char* topic, const std::string& payload) -> Mycila::HA::err_t {
       // Here, you would call your mqttClient.publish() code
       Serial.println(topic);
       Serial.println(payload.c_str());
+
+      // Serial-only demo; return your MQTT transport's error code from here.
+      return Mycila::HA::Error::SUCCESS;
     });
 
   haDiscovery.setWillTopic("~/status");

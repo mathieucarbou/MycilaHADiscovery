@@ -42,8 +42,10 @@ Setup:
       .url = "http://" + WiFi.localIP().toString(),
     },
     "/my-app", // base topic
-    [](const char* topic, const char* payload) {
-      // Here, you would call your mqttClient.publish() code
+    [](const char* topic, const std::string& payload) -> Mycila::HA::err_t {
+      // Here, you would call your mqttClient.publish() code and return
+      // Mycila::HA::Error::SUCCESS when the transport accepted the message
+      return Mycila::HA::Error::SUCCESS;
     });
 
   haDiscovery.setWillTopic("~/status");

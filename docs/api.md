@@ -31,15 +31,33 @@ Mycila::HA
 | Method | Description |
 | :-- | :-- |
 | `Discovery(Device, std::string baseTopic, PublisherCallback)` | Store device, base topic and publisher callback |
+| `const Device& getDevice() const` | Return the device identity by const reference |
+| `const std::string& getBaseTopic() const` | Return the base topic by const reference |
 | `setDiscoveryTopic(std::string)` | Change the discovery prefix (default `homeassistant`) |
+| `const std::string& getDiscoveryTopic() const` | Return the current discovery prefix by const reference |
 | `setWillTopic(std::string)` | Global availability topic (LWT) |
-| `publish(std::unique_ptr<Component>)` | Allocate, serialize and publish the component; frees it when done |
-| `publish<T>(Args&&...)` | Convenience overload: constructs `T` in place with `make_unique` |
-| `unpublish(std::unique_ptr<Component>)` | Publish an empty payload to the component discovery topic |
-| `unpublish<T>(Args&&...)` | Convenience overload |
+| `const std::string& getWillTopic() const` | Return the current global availability topic (LWT) by const reference |
+| `err_t publish(std::unique_ptr<Component>)` | Allocate, serialize and publish the component; frees it even on failure |
+| `err_t publish<T>(Args&&...)` | Convenience overload: constructs `T` in place with `make_unique` |
+| `err_t unpublish(std::unique_ptr<Component>)` | Publish an empty payload to the component discovery topic; frees the component |
+| `err_t unpublish<T>(Args&&...)` | Convenience overload |
 | `end()` | Clears the publisher callback |
 
-`PublisherCallback` is `std::function<void(const char* topic, const std::string& payload)>`.
+`PublisherCallback` is `std::function<err_t(const char* topic, const std::string& payload)>` where `err_t` is `Mycila::HA::Error`, a `uint8_t` enum class.
+
+`publish()` and `unpublish()` return `Error::SUCCESS` on success, a library error code when the config cannot be prepared, or the value returned by the publisher callback. Codes below `Error::ERR_MQTT_PUBLISHER` (32) are reserved by the library; codes from `Error::ERR_MQTT_PUBLISHER` on are free for applications: the publisher callback can return any of them to propagate transport-specific errors to the caller.
+
+| Error | Description |
+| :-- | :-- |
+| `Error::SUCCESS` (0) | Published / unpublished |
+| `Error::NO_DISCOVERY_TOPIC` | Discovery topic is empty |
+| `Error::NO_BASE_TOPIC` | Base topic is empty |
+| `Error::NO_PUBLISHER` | No publisher callback |
+| `Error::NO_DEVICE_ID` | Device id is empty |
+| `Error::OUT_OF_MEMORY` | Not enough memory to serialize the config |
+| `Error::ERR_MQTT_PUBLISHER` (32) | First code usable by applications and the publisher callback |
+
+The callback is synchronous and should report whether the transport accepted the message, not whether the broker or Home Assistant has processed it. An asynchronous transport must copy the topic and payload before returning. Components are consumed even on failure; retry requires a new component and is the caller's responsibility.
 
 ## Component base fields (all components)
 

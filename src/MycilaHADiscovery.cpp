@@ -33,18 +33,18 @@ namespace Mycila {
   } // namespace HA
 } // namespace Mycila
 
-void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
+Mycila::HA::err_t Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   if (_discoveryTopic.empty())
-    return;
+    return Error::NO_DISCOVERY_TOPIC;
 
   if (_baseTopic.empty())
-    return;
+    return Error::NO_BASE_TOPIC;
 
   if (!_publisher)
-    return;
+    return Error::NO_PUBLISHER;
 
   if (_device.id.empty())
-    return;
+    return Error::NO_DEVICE_ID;
 
   JsonDocument doc;
   JsonObject root = doc.to<JsonObject>();
@@ -102,7 +102,7 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
 
   if (doc.overflowed()) {
     ESP_LOGE(TAG, "Not enough memory for discovery config");
-    return;
+    return Error::OUT_OF_MEMORY;
   }
 
   std::string buffer;
@@ -112,26 +112,26 @@ void Mycila::HA::Discovery::publish(std::unique_ptr<Component> component) {
   const std::string topic = componentConfigTopic(component.get(), _discoveryTopic, _device.id);
 
   ESP_LOGD(TAG, "%s [%d b]", topic.c_str(), buffer.length());
-  _publisher(topic.c_str(), buffer);
+  return _publisher(topic.c_str(), buffer);
 }
 
-void Mycila::HA::Discovery::unpublish(std::unique_ptr<Component> component) {
+Mycila::HA::err_t Mycila::HA::Discovery::unpublish(std::unique_ptr<Component> component) {
   if (_discoveryTopic.empty())
-    return;
+    return Error::NO_DISCOVERY_TOPIC;
 
   if (_baseTopic.empty())
-    return;
+    return Error::NO_BASE_TOPIC;
 
   if (!_publisher)
-    return;
+    return Error::NO_PUBLISHER;
 
   if (_device.id.empty())
-    return;
+    return Error::NO_DEVICE_ID;
 
   const std::string topic = componentConfigTopic(component.get(), _discoveryTopic, _device.id);
 
   ESP_LOGD(TAG, "unpublish: %s", topic.c_str());
-  _publisher(topic.c_str(), "");
+  return _publisher(topic.c_str(), "");
 }
 
 void Mycila::HA::Discovery::end() {
